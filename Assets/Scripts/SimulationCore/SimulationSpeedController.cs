@@ -1,29 +1,43 @@
+//#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
+//using UnityEngine.InputSystem;
+//#endif
+
+//[Header("Speed")]
+//[Tooltip("Current simulation speed")]
+//[Range(MIN_SPEED, MAX_SPEED)]    -    не работает не с константами
+
 using UnityEngine;
 
 public class SimulationSpeedController : MonoBehaviour
 {
-    [SerializeField] private const int MAX_SPEED = 100;
-    [SerializeField] private const int SPEED_CHANGE_STEP = 2;
-    private int _speed;
+    [Header("Speed constants")]
+    [SerializeField] private int MAX_SPEED = 100;
+    [SerializeField] private int MIN_SPEED = 0;
+    [SerializeField] private int SPEED_CHANGE_STEP = 2;
 
-    public string SpeedToUI => _speed.ToString();
-    public int Speed => _speed;
+    public int Speed { get; private set; }
+
+    public string SpeedToUI => Speed.ToString();
 
     public void SetSpeed(int speed)
     {
-        if (_speed == speed) return;
-        if (speed < 0) _speed = 0;
-        else if (speed > MAX_SPEED) _speed = MAX_SPEED;
-        else _speed = speed;
+        if (Speed == speed) return;
+        if (speed < MIN_SPEED) Speed = MIN_SPEED;
+        else if (speed > MAX_SPEED) Speed = MAX_SPEED;
+        else Speed = speed;
     }
 
     public void IncreaseSpeed()
     {
-        _speed += SPEED_CHANGE_STEP;
+        if (Speed == MAX_SPEED) return;
+        if (Speed + SPEED_CHANGE_STEP > MAX_SPEED) Speed = MAX_SPEED;
+        Speed += SPEED_CHANGE_STEP;
     }
 
     public void DecreaseSpeed()
     {
-        _speed -= SPEED_CHANGE_STEP;
+        if (Speed == MIN_SPEED) return;
+        if (Speed - SPEED_CHANGE_STEP < MIN_SPEED) Speed = MIN_SPEED;
+        Speed -= SPEED_CHANGE_STEP;
     }
 }
