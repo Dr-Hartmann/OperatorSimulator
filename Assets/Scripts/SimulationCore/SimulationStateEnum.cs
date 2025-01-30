@@ -1,4 +1,4 @@
-public enum StateSimulation
+public enum SimulationStateEnum
 {
     Started,
     Paused,

@@ -2,26 +2,25 @@
 //using UnityEngine.InputSystem;
 //#endif
 
-//[Header("Speed")]
-//[Tooltip("Current simulation speed")]
-//[Range(MIN_SPEED, MAX_SPEED)]    -    не работает не с константами
-
 using UnityEngine;
 
 public class SimulationSpeedController : MonoBehaviour
 {
     [Header("Speed constants")]
-    [SerializeField] private int MAX_SPEED = 100;
-    [SerializeField] private int MIN_SPEED = 0;
-    [SerializeField] private int SPEED_CHANGE_STEP = 2;
+    [SerializeField] private float MAX_SPEED = 2f;
+    [SerializeField] private float MIN_SPEED = 0f;
+    [SerializeField] private float SPEED_CHANGE_STEP = .25f;
 
-    public int Speed { get; private set; }
-
+    public float Speed { get; private set; } = 1f;
     public string SpeedToUI => Speed.ToString();
 
-    public void SetSpeed(int speed)
+    private void Start()
     {
-        if (Speed == speed) return;
+        this.gameObject.SetActive(true);
+    }
+
+    public void SetSpeed(float speed)
+    {
         if (speed < MIN_SPEED) Speed = MIN_SPEED;
         else if (speed > MAX_SPEED) Speed = MAX_SPEED;
         else Speed = speed;
@@ -29,15 +28,13 @@ public class SimulationSpeedController : MonoBehaviour
 
     public void IncreaseSpeed()
     {
-        if (Speed == MAX_SPEED) return;
-        if (Speed + SPEED_CHANGE_STEP > MAX_SPEED) Speed = MAX_SPEED;
         Speed += SPEED_CHANGE_STEP;
+        if (Speed > MAX_SPEED) Speed = MAX_SPEED;
     }
 
     public void DecreaseSpeed()
     {
-        if (Speed == MIN_SPEED) return;
-        if (Speed - SPEED_CHANGE_STEP < MIN_SPEED) Speed = MIN_SPEED;
         Speed -= SPEED_CHANGE_STEP;
+        if (Speed < MIN_SPEED) Speed = MIN_SPEED;
     }
 }
