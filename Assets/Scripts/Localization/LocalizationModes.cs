@@ -1,4 +1,4 @@
-public enum LocalizationModes
+internal enum LocalizationModes
 {
     SWITCH_NEXT,
     SET
