@@ -793,6 +793,7 @@ GameObject:
   - component: {fileID: 438086719}
   - component: {fileID: 438086721}
   - component: {fileID: 438086720}
+  - component: {fileID: 438086722}
   m_Layer: 5
   m_Name: StopPanel
   m_TagString: Untagged
@@ -858,6 +859,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 438086718}
   m_CullTransparentMesh: 1
+--- !u!114 &438086722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438086718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 626f2f4a229bc4b48847e2e4bdbfeb30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &616405112
 GameObject:
   m_ObjectHideFlags: 0
@@ -1378,7 +1391,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetFramerate: 24
-  SimulationState: 1
   _speedText: {fileID: 255516786}
   MAX_SPEED: 2
   MIN_SPEED: 0
@@ -1409,7 +1421,7 @@ GameObject:
   - component: {fileID: 1395832107}
   - component: {fileID: 1395832106}
   m_Layer: 0
-  m_Name: LocalizationSystem
+  m_Name: LocalizationUISystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1427,6 +1439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 080976c3ddd39554f843bf1cfd9628b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _uiFolderName: UI
 --- !u!4 &1395832107
 Transform:
   m_ObjectHideFlags: 0
@@ -1575,58 +1588,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cca1b4e1ce64f61458e7380f1d7ce375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _controlPanel: {fileID: 0}
+  _stopPanel: {fileID: 438086720}
   _pauseSprite: {fileID: -513916717, guid: c862e77854a120746b5b6eae92029214, type: 3}
   _playSprite: {fileID: 1446499372, guid: 6b7b7670d5faec04f9d0a41c5dee556e, type: 3}
-  _isPlaying: 0
---- !u!1 &1822895254
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1822895256}
-  - component: {fileID: 1822895255}
-  m_Layer: 0
-  m_Name: SimulationSpeedController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1822895255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1822895254}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81c2fc82cc2853e48a80427df109a3f8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MAX_SPEED: 2
-  MIN_SPEED: 0
-  SPEED_CHANGE_STEP: 0.25
-  <Speed>k__BackingField: 1
---- !u!4 &1822895256
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1822895254}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  _isPlaying: 1
 --- !u!1 &1831189055
 GameObject:
   m_ObjectHideFlags: 0
@@ -2077,11 +2042,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 100
+      value: 160.1614
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 160.1614
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2113,11 +2078,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 376.0628
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 75.9372
       objectReference: {fileID: 0}
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2148,6 +2113,5 @@ SceneRoots:
   - {fileID: 1036236572}
   - {fileID: 1831189059}
   - {fileID: 1347543288}
-  - {fileID: 1822895256}
   - {fileID: 616405115}
   - {fileID: 1395832107}

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-internal class ControlButtonSpeedMore : MonoBehaviour
+internal class LocalizationUIButtonHandler : MonoBehaviour
 {
     private Button _thisButton;
 
@@ -13,13 +13,18 @@ internal class ControlButtonSpeedMore : MonoBehaviour
 
     private void Start()
     {
-        _thisButton = GetComponent<Button>();
+        _thisButton = this.gameObject.GetComponent<Button>();
         _thisButton.onClick.AddListener(OnClick);
     }
 
     public void OnClick()
     {
-        SimulationSystem.instance.SpeedIncrease();
+        if (LocalizationUISystem.instance == null)
+        {
+            Debug.LogError("LocalizationUIButtonHandler: LocalizationUISystem instance not found!");
+            return;
+        }
+        LocalizationUISystem.instance.LoadUIText(LocalizationModes.SWITCH_NEXT);
     }
 
     private void OnDestroy()

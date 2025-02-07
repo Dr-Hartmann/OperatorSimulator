@@ -12,7 +12,7 @@ internal class SimulationSystem : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _speedText;
 
     [Header("Speed constants")]
-    [SerializeField] private float MAX_SPEED = 2f;
+    [SerializeField] private float MAX_SPEED = 4f;
     [SerializeField] private float MIN_SPEED = 0f;
     [SerializeField] private float SPEED_CHANGE_STEP = .25f;
 
@@ -54,10 +54,12 @@ internal class SimulationSystem : MonoBehaviour
 
     private void Update()
     {
+        _speedText.SetText(CurrentSpeed.ToString());// TODO - убрать отсюда
+
         if (IsStarted)
         {
             TickPassed?.Invoke(Time.deltaTime * CurrentSpeed);
-            _speedText.SetText(CurrentSpeed.ToString());// TODO - убрать отсюда
+            
         }
         else if (IsPaused)
         {

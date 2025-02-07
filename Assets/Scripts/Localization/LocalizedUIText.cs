@@ -1,7 +1,8 @@
 ﻿using TMPro;
 using UnityEngine;
 
-internal class LocalizedText : MonoBehaviour
+[RequireComponent(typeof(TextMeshProUGUI))]
+internal class LocalizedUIText : MonoBehaviour
 {
     [SerializeField] private string _textKey;
     [SerializeField] private RectTransform _shell;
@@ -9,34 +10,35 @@ internal class LocalizedText : MonoBehaviour
 
     private void Awake()
     {
-        _thisText = this.GetComponent<TextMeshProUGUI>();
-        if (_thisText == null)
-        {
-            Debug.LogError($"LocalizedText: Text component not found - {_textKey}");
-            return;
-        }
-        LocalizationSystem.LanguageChanged += UpdateText;
         this.gameObject.SetActive(true);
     }
 
     private void Start()
     {
-        UpdateText();
+        _thisText = this.GetComponent<TextMeshProUGUI>();
+        if (_thisText == null || _textKey == "" || _shell == null)
+        {
+            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
+            return;
+        }
+
+        LocalizationUISystem.LanguageChanged += UpdateTextAndAdjustWidth;
+        UpdateTextAndAdjustWidth();
     }
 
     private void OnDestroy()
     {
-        LocalizationSystem.LanguageChanged -= UpdateText;
+        LocalizationUISystem.LanguageChanged -= UpdateTextAndAdjustWidth;
     }
 
-    public void UpdateText()
+    public void UpdateTextAndAdjustWidth()
     {
-        if (_thisText == null)
+        if (_thisText == null || _textKey == "" || _shell == null)
         {
-            Debug.LogError($"LocalizedText: Text component not found - {_textKey}");
+            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
             return;
         }
-        _thisText.SetText(LocalizationSystem.instance.GetLocalizedText(_textKey));
+        _thisText.SetText(LocalizationUISystem.instance.GetText(_textKey));
         AdjustWidth();
     }
 

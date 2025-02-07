@@ -92,7 +92,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 15.3
+  m_fontSize: 30
   m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -170,10 +170,10 @@ RectTransform:
   - {fileID: 5666032893736635622}
   m_Father: {fileID: 87073006673447162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 68.70006}
-  m_SizeDelta: {x: 100, y: 30}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: -50}
+  m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8414869970758104800
 CanvasRenderer:
@@ -362,3 +362,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1024da78fe2619a49b07efe533115412, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _spriteNeutral: {fileID: -1763671082, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
+  _spriteClose: {fileID: -1776586096, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
+  _spriteAverage: {fileID: 576502844, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
+  _spriteOpen: {fileID: 781954147, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
+  _currentValveState: 0
+  _openingSensorText: {fileID: 552868605750963710}
+  _openingPercentage: 50
+  _openingSpeed: 1
+  _closingSpeed: 0.1
+  _multiplierSoonToEndState: 5

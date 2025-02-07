@@ -4,6 +4,6 @@ public class ControlPanel : MonoBehaviour
 {
     private void Awake()
     {
-        this.gameObject.SetActive(false);
+        this.gameObject.SetActive(true);
     }
 }
