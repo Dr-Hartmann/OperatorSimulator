@@ -369,6 +369,6 @@ MonoBehaviour:
   _currentValveState: 0
   _openingSensorText: {fileID: 552868605750963710}
   _openingPercentage: 50
-  _openingSpeed: 1
-  _closingSpeed: 0.1
+  _openingSpeed: 5
+  _closingSpeed: 4
   _multiplierSoonToEndState: 5

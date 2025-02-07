@@ -1392,7 +1392,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _targetFramerate: 24
   _speedText: {fileID: 255516786}
-  MAX_SPEED: 2
+  MAX_SPEED: 4
   MIN_SPEED: 0
   SPEED_CHANGE_STEP: 0.25
 --- !u!4 &1347543288
@@ -2095,6 +2095,10 @@ PrefabInstance:
     - target: {fileID: 87073006673447162, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2114038001647799509, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
+      propertyPath: _currentValveState
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4961082538912455940, guid: ab1baa408030b354bb6081e18943ca24, type: 3}
       propertyPath: m_Name
