@@ -15,15 +15,14 @@ internal class ControlButtonPlayPause : MonoBehaviour
 
     private void Awake()
     {
+        _thisImage = GetComponent<Image>();
+        _thisButton = GetComponent<Button>();
         this.gameObject.SetActive(true);
     }
 
     private void Start()
     {
-        _thisImage = GetComponent<Image>();
-        _thisButton = GetComponent<Button>();
         _thisButton.onClick.AddListener(OnClick);
-
         if (_isPlaying) StartAndChangeSprite();
         else PauseAndChangeSprite();
     }

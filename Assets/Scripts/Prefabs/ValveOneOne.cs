@@ -75,7 +75,7 @@ internal class ValveOneOne : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"ValveOneOne: The valve is in an unknown state");
+            SimulationUtilities.DisplayError($"ValveOneOne: The valve is in an unknown state");
             return;
         }
     }

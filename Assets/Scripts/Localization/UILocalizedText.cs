@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
-internal class LocalizedUIText : MonoBehaviour
+internal class UILocalizedText : MonoBehaviour
 {
     [SerializeField] private string _textKey;
     [SerializeField] private RectTransform _shell;
@@ -18,27 +18,27 @@ internal class LocalizedUIText : MonoBehaviour
         _thisText = this.GetComponent<TextMeshProUGUI>();
         if (_thisText == null || _textKey == "" || _shell == null)
         {
-            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
+            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
             return;
         }
 
-        LocalizationUISystem.LanguageChanged += UpdateTextAndAdjustWidth;
+        UILocalizationSystem.LanguageChanged += UpdateTextAndAdjustWidth;
         UpdateTextAndAdjustWidth();
     }
 
     private void OnDestroy()
     {
-        LocalizationUISystem.LanguageChanged -= UpdateTextAndAdjustWidth;
+        UILocalizationSystem.LanguageChanged -= UpdateTextAndAdjustWidth;
     }
 
     public void UpdateTextAndAdjustWidth()
     {
         if (_thisText == null || _textKey == "" || _shell == null)
         {
-            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
+            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
             return;
         }
-        _thisText.SetText(LocalizationUISystem.instance.GetText(_textKey));
+        _thisText.SetText(UILocalizationSystem.instance.GetText(_textKey));
         AdjustWidth();
     }
 

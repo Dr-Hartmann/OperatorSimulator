@@ -1,7 +1,6 @@
 using System;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 internal class SimulationSystem : MonoBehaviour
@@ -59,7 +58,6 @@ internal class SimulationSystem : MonoBehaviour
         if (IsStarted)
         {
             TickPassed?.Invoke(Time.deltaTime * CurrentSpeed);
-            
         }
         else if (IsPaused)
         {
