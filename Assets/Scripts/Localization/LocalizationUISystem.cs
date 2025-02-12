@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.IO;
 
-internal class UILocalizationSystem : MonoBehaviour
+internal class LocalizationUISystem : MonoBehaviour
 {
     [SerializeField] private string _uiPath;
     [SerializeField] private string _separator = "===";
@@ -12,7 +12,7 @@ internal class UILocalizationSystem : MonoBehaviour
 
     public delegate void OnLanguageChanged();
     public static event OnLanguageChanged LanguageChanged;
-    public static UILocalizationSystem instance { get; private set; }
+    public static LocalizationUISystem instance { get; private set; }
     public string CurrentLanguage { get; private set; }
 
     private Dictionary<string, string> _languageFiles = null;
@@ -39,7 +39,7 @@ internal class UILocalizationSystem : MonoBehaviour
         string currentCulture = CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
         string startLanguage = PlayerPrefs.GetString("language", currentCulture);
 
-        LoadUIText(UILocalizationModes.SET, startLanguage);
+        LoadUIText(LocalizationModes.SET, startLanguage);
 
         this.gameObject.SetActive(true);
     }
@@ -49,7 +49,7 @@ internal class UILocalizationSystem : MonoBehaviour
         
     }
 
-    public void LoadUIText(UILocalizationModes mode, string languageCode = "en")
+    public void LoadUIText(LocalizationModes mode, string languageCode = "en")
     {
         if (IsEmptyLocalizationFiles()) return;
         if(!DetermineAndSetLanguage(mode, languageCode)) return;
@@ -114,20 +114,20 @@ internal class UILocalizationSystem : MonoBehaviour
         if (IsEmptyLocalizationFiles()) return false;
         return true;
     }
-    private bool DetermineAndSetLanguage(UILocalizationModes mode, string languageCode)
+    private bool DetermineAndSetLanguage(LocalizationModes mode, string languageCode)
     {
         if(!CheckLanguageAvailability(languageCode)) return false;
 
         switch (mode)
         {
-            case UILocalizationModes.SWITCH_NEXT:
+            case LocalizationModes.SWITCH_NEXT:
                 List<string> list = _languageFiles.Values.ToList();
                 int currentIndex = list.IndexOf(_languageFiles.GetValueOrDefault(CurrentLanguage));
                 int nextIndex = (currentIndex + 1) % _languageFiles.Count;
                 CurrentLanguage = _languageFiles.ElementAt(nextIndex).Key;
                 break;
 
-            case UILocalizationModes.SET:
+            case LocalizationModes.SET:
                 CurrentLanguage = languageCode;
                 break;
 

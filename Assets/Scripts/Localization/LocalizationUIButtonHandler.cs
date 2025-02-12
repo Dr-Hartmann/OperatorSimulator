@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(Button))]
-internal class UILocalizationButtonHandler : MonoBehaviour
+internal class LocalizationUIButtonHandler : MonoBehaviour
 {
     private Button _thisButton;
 
@@ -19,8 +19,8 @@ internal class UILocalizationButtonHandler : MonoBehaviour
 
     public void OnClick()
     {
-        if(UILocalizationSystem.instance.IsInstanceNull()) return;
-        UILocalizationSystem.instance.LoadUIText(UILocalizationModes.SWITCH_NEXT);
+        if(LocalizationUISystem.instance.IsInstanceNull()) return;
+        LocalizationUISystem.instance.LoadUIText(LocalizationModes.SWITCH_NEXT);
     }
 
     private void OnDestroy()

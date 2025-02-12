@@ -19,6 +19,11 @@ public class TipButton : MonoBehaviour
 
     private void OnClick()
     {
-        UITipSystem.instance.MessageDisplayed?.Invoke("Сообе");
+        TipUI.CreateTip("Какое-то сообщение ла ла ла" + Time.time.ToString());
+    }
+
+    private void OnDestroy()
+    {
+        _thisButton.onClick.RemoveAllListeners();
     }
 }

@@ -2,7 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
-internal class UILocalizedText : MonoBehaviour
+internal class LocalizedUIText : MonoBehaviour
 {
     [SerializeField] private string _textKey;
     [SerializeField] private RectTransform _shell;
@@ -22,13 +22,13 @@ internal class UILocalizedText : MonoBehaviour
             return;
         }
 
-        UILocalizationSystem.LanguageChanged += UpdateTextAndAdjustWidth;
+        LocalizationUISystem.LanguageChanged += UpdateTextAndAdjustWidth;
         UpdateTextAndAdjustWidth();
     }
 
     private void OnDestroy()
     {
-        UILocalizationSystem.LanguageChanged -= UpdateTextAndAdjustWidth;
+        LocalizationUISystem.LanguageChanged -= UpdateTextAndAdjustWidth;
     }
 
     public void UpdateTextAndAdjustWidth()
@@ -38,7 +38,7 @@ internal class UILocalizedText : MonoBehaviour
             SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
             return;
         }
-        _thisText.SetText(UILocalizationSystem.instance.GetText(_textKey));
+        _thisText.SetText(LocalizationUISystem.instance.GetText(_textKey));
         AdjustWidth();
     }
 
