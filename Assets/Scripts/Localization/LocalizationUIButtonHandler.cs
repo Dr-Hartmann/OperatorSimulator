@@ -8,22 +8,18 @@ internal class LocalizationUIButtonHandler : MonoBehaviour
 
     private void Awake()
     {
+        _thisButton = this.gameObject.GetComponent<Button>();
         this.gameObject.SetActive(true);
     }
 
     private void Start()
     {
-        _thisButton = this.gameObject.GetComponent<Button>();
         _thisButton.onClick.AddListener(OnClick);
     }
 
     public void OnClick()
     {
-        if (LocalizationUISystem.instance == null)
-        {
-            Debug.LogError("LocalizationUIButtonHandler: LocalizationUISystem instance not found!");
-            return;
-        }
+        if(LocalizationUISystem.instance.IsInstanceNull()) return;
         LocalizationUISystem.instance.LoadUIText(LocalizationModes.SWITCH_NEXT);
     }
 

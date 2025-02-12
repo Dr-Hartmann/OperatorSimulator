@@ -6,24 +6,39 @@ using System.IO;
 
 internal class LocalizationUISystem : MonoBehaviour
 {
-    [SerializeField] private string _uiFolderName;
+    [SerializeField] private string _uiPath;
+    [SerializeField] private string _separator = "===";
+    [SerializeField] private string _endLine = "</END>";
 
     public delegate void OnLanguageChanged();
     public static event OnLanguageChanged LanguageChanged;
     public static LocalizationUISystem instance { get; private set; }
     public string CurrentLanguage { get; private set; }
 
-    private Dictionary<string, string> _languagePath = null;
+    private Dictionary<string, string> _languageFiles = null;
     private Dictionary<string, string> _localizedText = null;
 
     private void Awake()
     {
-        if (IsNullAndSetInstance()) return;
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        if (IsInstanceNull()) return;
+        if (!GetLanguageFiles()) return;
+
         PlayerPrefs.DeleteAll(); // TODO - удалить настройки пользователя, использовать log файлы
 
-        string startLanguage = PlayerPrefs.GetString("language", CultureInfo.InstalledUICulture.TwoLetterISOLanguageName);
-        if (CheckFilesAndIsEmpty()) return;
-        if (startLanguage == "") startLanguage = "en";
+        string currentCulture = CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
+        string startLanguage = PlayerPrefs.GetString("language", currentCulture);
+
         LoadUIText(LocalizationModes.SET, startLanguage);
 
         this.gameObject.SetActive(true);
@@ -34,97 +49,117 @@ internal class LocalizationUISystem : MonoBehaviour
         
     }
 
-    private bool IsNullAndSetInstance()
-    {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(this.gameObject);
-            return false;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            return true;
-        }
-    }
-
     public void LoadUIText(LocalizationModes mode, string languageCode = "en")
     {
-        if (!IsModeCorrectAndLoadText(mode, languageCode)) return;
-        SetThisPlayerLanguage();
-        if (ReadingFileAndIsNull()) return;
+        if (IsEmptyLocalizationFiles()) return;
+        if(!DetermineAndSetLanguage(mode, languageCode)) return;
+        if (!ReadCurrentLanguageFile()) return;
+
         // обновление всех подписанных текстов
         LanguageChanged?.Invoke();
     }
 
     public string GetText(string textKey)
     {
+        if (IsEmptyLocalizationText()) return textKey;
         if (_localizedText.TryGetValue(textKey, out string value)) return value;
-        Debug.LogWarning($"LocalizationUISystem: Invalid key - {textKey}");
+        SimulationUtilities.DisplayWarning($"Invalid key - {textKey}");
         return textKey;
     }
 
-    private bool CheckFilesAndIsEmpty()
+    public bool IsEmptyLocalizationFiles()
     {
-        _languagePath = new Dictionary<string, string>();
-        string localizationPath = Application.streamingAssetsPath + "/Localization/" + _uiFolderName;
-        string[] filesPath = Directory.GetFiles(localizationPath, "*.txt");
-        foreach (string path in filesPath)
+        if (_languageFiles == null || _languageFiles.Count <= 0)
         {
-            _languagePath.Add(Path.GetFileNameWithoutExtension(path), path);
-        }
-
-        if (_languagePath.Count <= 0)
-        {
-            Debug.LogError($"LocalizationUISystem: localization files are missing");
+            SimulationUtilities.DisplayError($"Localization files do not exist");
             return true;
         }
         return false;
     }
-
-    private bool IsModeCorrectAndLoadText(LocalizationModes mode, string languageCode)
+    public bool IsEmptyLocalizationText()
     {
-        if (mode == LocalizationModes.SWITCH_NEXT)
+        if (_localizedText == null || _localizedText.Count <= 0)
         {
-            List<string> list = _languagePath.Values.ToList();
-            int currentIndex = list.IndexOf(_languagePath.GetValueOrDefault(CurrentLanguage));
-            int nextIndex = (currentIndex + 1) % _languagePath.Count;
-            CurrentLanguage = _languagePath.ElementAt(nextIndex).Key;
+            SimulationUtilities.DisplayError($"There is no text");
+            return true;
         }
-        else if (mode == LocalizationModes.SET)
+        return false;
+    }
+    public bool IsInstanceNull()
+    {
+        if (instance == null)
         {
-            CurrentLanguage = languageCode;
+            SimulationUtilities.DisplayError("Instance is null");
+            return true;
         }
-        else
-        {
-            Debug.LogError($"LocalizationUISystem: Invalid mode - {mode}");
-            return false;
-        }
-        return true;
+        return false;
+    }
+    public bool CheckLanguageAvailability(string languageCode)
+    {
+        bool check = _languageFiles.TryGetValue(languageCode, out var value);
+        if (!check) SimulationUtilities.DisplayError("Language not found");
+        return check;
     }
 
-    private bool ReadingFileAndIsNull()
+    private bool GetLanguageFiles()
     {
-        // чтение ключ-значение
+        _languageFiles = new Dictionary<string, string>();
+        string localizationPath = Application.streamingAssetsPath + "/" + _uiPath;
+        string[] filesPath = Directory.GetFiles(localizationPath, "*.txt");
+        foreach (string path in filesPath)
+        {
+            _languageFiles.Add(Path.GetFileNameWithoutExtension(path), path);
+        }
+
+        if (IsEmptyLocalizationFiles()) return false;
+        return true;
+    }
+    private bool DetermineAndSetLanguage(LocalizationModes mode, string languageCode)
+    {
+        if(!CheckLanguageAvailability(languageCode)) return false;
+
+        switch (mode)
+        {
+            case LocalizationModes.SWITCH_NEXT:
+                List<string> list = _languageFiles.Values.ToList();
+                int currentIndex = list.IndexOf(_languageFiles.GetValueOrDefault(CurrentLanguage));
+                int nextIndex = (currentIndex + 1) % _languageFiles.Count;
+                CurrentLanguage = _languageFiles.ElementAt(nextIndex).Key;
+                break;
+
+            case LocalizationModes.SET:
+                CurrentLanguage = languageCode;
+                break;
+
+            default:
+                SimulationUtilities.DisplayError($"Invalid mode - {mode}");
+                break;
+        }
+        SetThisPlayerLanguage();
+
+        return true;
+    }
+    private bool ReadCurrentLanguageFile()
+    {
         _localizedText = new Dictionary<string, string>();
-        string[] lines = File.ReadAllText(_languagePath[CurrentLanguage]).Split("</END>");
+        string[] lines = File.ReadAllText(_languageFiles[CurrentLanguage]).Split(_endLine);
         foreach (string item in lines)
         {
             if (!string.IsNullOrWhiteSpace(item))
             {
-                string[] keyValue = item.Split("===");
+                string[] keyValue = item.Split(_separator);
                 if (keyValue.Length == 2)
                 {
                     _localizedText[keyValue[0].Trim()] = keyValue[1].Trim();
                     continue;
                 }
-                Debug.LogWarning($"LocalizationUISystem: Invalid line - {item}");
+                SimulationUtilities.DisplayWarning($"Invalid line - {item}");
             }
         }
-        return false;
-    }
 
+        if(IsEmptyLocalizationText()) return false;
+        return true;
+    }
     private void SetThisPlayerLanguage()
     {
         PlayerPrefs.SetString("language", CurrentLanguage);

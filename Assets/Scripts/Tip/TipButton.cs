@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
-internal class ControlButtonSpeedLess : MonoBehaviour
+[RequireComponent (typeof(Button))]
+public class TipButton : MonoBehaviour
 {
     private Button _thisButton;
 
@@ -14,12 +14,12 @@ internal class ControlButtonSpeedLess : MonoBehaviour
 
     private void Start()
     {
-        _thisButton.onClick.AddListener(OnClick);
+        _thisButton.onClick.AddListener(this.OnClick);
     }
 
-    public void OnClick()
+    private void OnClick()
     {
-        SimulationSystem.instance.SpeedDecrease();
+        TipUI.CreateTip("Какое-то сообщение ла ла ла" + Time.time.ToString());
     }
 
     private void OnDestroy()

@@ -18,7 +18,7 @@ internal class LocalizedUIText : MonoBehaviour
         _thisText = this.GetComponent<TextMeshProUGUI>();
         if (_thisText == null || _textKey == "" || _shell == null)
         {
-            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
+            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
             return;
         }
 
@@ -35,7 +35,7 @@ internal class LocalizedUIText : MonoBehaviour
     {
         if (_thisText == null || _textKey == "" || _shell == null)
         {
-            Debug.LogError($"LocalizedText: Invalid ui-text object - {_textKey}");
+            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
             return;
         }
         _thisText.SetText(LocalizationUISystem.instance.GetText(_textKey));
