@@ -9,6 +9,5 @@ public class ControlPanel : MonoBehaviour
     private void Awake()
     {
         _thisImage = GetComponent<Image>();
-        this.gameObject.SetActive(true);
     }
 }

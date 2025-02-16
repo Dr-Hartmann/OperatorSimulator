@@ -9,11 +9,6 @@ internal class ControlButtonSpeedMore : MonoBehaviour
     private void Awake()
     {
         _thisButton = GetComponent<Button>();
-        this.gameObject.SetActive(true);
-    }
-
-    private void Start()
-    {
         _thisButton.onClick.AddListener(OnClick);
     }
 

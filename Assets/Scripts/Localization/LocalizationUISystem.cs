@@ -13,46 +13,26 @@ internal class LocalizationUISystem : MonoBehaviour
     public delegate void OnLanguageChanged();
     public static event OnLanguageChanged LanguageChanged;
     public static LocalizationUISystem instance { get; private set; }
-    public string CurrentLanguage { get; private set; }
 
     private Dictionary<string, string> _languageFiles = null;
     private Dictionary<string, string> _localizedText = null;
 
     private void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(this.gameObject);
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-
-        if (IsInstanceNull()) return;
+        if (!SetInstance()) return;
         if (!GetLanguageFiles()) return;
 
         PlayerPrefs.DeleteAll(); // TODO - удалить настройки пользователя, использовать log файлы
-
         string currentCulture = CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
         string startLanguage = PlayerPrefs.GetString("language", currentCulture);
-
         LoadUIText(LocalizationModes.SET, startLanguage);
-
-        this.gameObject.SetActive(true);
-    }
-
-    private void Start()
-    {
-        
     }
 
     public void LoadUIText(LocalizationModes mode, string languageCode = "en")
     {
+        if (IsInstanceNull()) return;
         if (IsEmptyLocalizationFiles()) return;
-        if(!DetermineAndSetLanguage(mode, languageCode)) return;
+        if (!DetermineAndSetLanguage(mode, languageCode)) return;
         if (!ReadCurrentLanguageFile()) return;
 
         // обновление всех подписанных текстов
@@ -94,13 +74,24 @@ internal class LocalizationUISystem : MonoBehaviour
         }
         return false;
     }
-    public bool CheckLanguageAvailability(string languageCode)
+    public bool IsLanguageAvailable(string languageCode)
     {
         bool check = _languageFiles.TryGetValue(languageCode, out var value);
         if (!check) SimulationUtilities.DisplayError("Language not found");
         return check;
     }
 
+    private bool SetInstance()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
+            return true;
+        }
+        Destroy(this.gameObject);
+        return false;
+    }
     private bool GetLanguageFiles()
     {
         _languageFiles = new Dictionary<string, string>();
@@ -116,19 +107,19 @@ internal class LocalizationUISystem : MonoBehaviour
     }
     private bool DetermineAndSetLanguage(LocalizationModes mode, string languageCode)
     {
-        if(!CheckLanguageAvailability(languageCode)) return false;
+        if (!IsLanguageAvailable(languageCode)) return false;
 
         switch (mode)
         {
             case LocalizationModes.SWITCH_NEXT:
                 List<string> list = _languageFiles.Values.ToList();
-                int currentIndex = list.IndexOf(_languageFiles.GetValueOrDefault(CurrentLanguage));
+                int currentIndex = list.IndexOf(_languageFiles.GetValueOrDefault(SimulationUtilities.CurrentLanguage));
                 int nextIndex = (currentIndex + 1) % _languageFiles.Count;
-                CurrentLanguage = _languageFiles.ElementAt(nextIndex).Key;
+                SimulationUtilities.CurrentLanguage = _languageFiles.ElementAt(nextIndex).Key;
                 break;
 
             case LocalizationModes.SET:
-                CurrentLanguage = languageCode;
+                SimulationUtilities.CurrentLanguage = languageCode;
                 break;
 
             default:
@@ -136,13 +127,12 @@ internal class LocalizationUISystem : MonoBehaviour
                 break;
         }
         SetThisPlayerLanguage();
-
         return true;
     }
     private bool ReadCurrentLanguageFile()
     {
         _localizedText = new Dictionary<string, string>();
-        string[] lines = File.ReadAllText(_languageFiles[CurrentLanguage]).Split(_endLine);
+        string[] lines = File.ReadAllText(_languageFiles[SimulationUtilities.CurrentLanguage]).Split(_endLine);
         foreach (string item in lines)
         {
             if (!string.IsNullOrWhiteSpace(item))
@@ -157,12 +147,12 @@ internal class LocalizationUISystem : MonoBehaviour
             }
         }
 
-        if(IsEmptyLocalizationText()) return false;
+        if (IsEmptyLocalizationText()) return false;
         return true;
     }
     private void SetThisPlayerLanguage()
     {
-        PlayerPrefs.SetString("language", CurrentLanguage);
+        PlayerPrefs.SetString("language", SimulationUtilities.CurrentLanguage);
         PlayerPrefs.Save();
     }
 }

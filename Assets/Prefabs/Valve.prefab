@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 209441321874236389}
   - component: {fileID: 552868605750963710}
   m_Layer: 0
-  m_Name: OpeningSensor
+  m_Name: TextOpeningSensor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -366,9 +366,9 @@ MonoBehaviour:
   _spriteClose: {fileID: -1776586096, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
   _spriteAverage: {fileID: 576502844, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
   _spriteOpen: {fileID: 781954147, guid: 244122b969e24a14b92cf3550351a6d4, type: 3}
-  _currentValveState: 2
   _openingSensorText: {fileID: 552868605750963710}
   _openingPercentage: 50
+  _currentValveState: 2
   _openingSpeed: 5
   _closingSpeed: 4
   _multiplierSoonToEndState: 5

@@ -1,3 +1,6 @@
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public static class SimulationUtilities
@@ -14,4 +17,6 @@ public static class SimulationUtilities
     {
         Debug.LogError(message);
     }
+
+    public static string CurrentLanguage { get; set; }
 }

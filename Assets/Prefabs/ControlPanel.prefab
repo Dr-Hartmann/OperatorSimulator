@@ -372,10 +372,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cca1b4e1ce64f61458e7380f1d7ce375, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isPlaying: 1
   _stopPanel: {fileID: 0}
   _pauseSprite: {fileID: -513916717, guid: c862e77854a120746b5b6eae92029214, type: 3}
   _playSprite: {fileID: 1446499372, guid: 6b7b7670d5faec04f9d0a41c5dee556e, type: 3}
-  _isPlaying: 1
 --- !u!1 &7269436747204865045
 GameObject:
   m_ObjectHideFlags: 0

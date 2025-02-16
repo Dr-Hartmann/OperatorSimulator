@@ -6,58 +6,45 @@ internal class LocalizedUIText : MonoBehaviour
 {
     [SerializeField] private string _textKey;
     [SerializeField] private RectTransform _shell;
+    [SerializeField] private float _additionalHeight = 10f;
     private TextMeshProUGUI _thisText;
 
     private void Awake()
     {
-        this.gameObject.SetActive(true);
+        _thisText = this.GetComponent<TextMeshProUGUI>();
     }
 
     private void Start()
     {
-        _thisText = this.GetComponent<TextMeshProUGUI>();
-        if (_thisText == null || _textKey == "" || _shell == null)
-        {
-            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
-            return;
-        }
-
-        LocalizationUISystem.LanguageChanged += UpdateTextAndAdjustWidth;
-        UpdateTextAndAdjustWidth();
+        if (IsNull()) return;
+        LocalizationUISystem.LanguageChanged += UpdateText;
+        UpdateText();
     }
 
     private void OnDestroy()
     {
-        LocalizationUISystem.LanguageChanged -= UpdateTextAndAdjustWidth;
+        LocalizationUISystem.LanguageChanged -= UpdateText;
     }
 
-    public void UpdateTextAndAdjustWidth()
+    public void UpdateText()
     {
-        if (_thisText == null || _textKey == "" || _shell == null)
-        {
-            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
-            return;
-        }
+        if (IsNull()) return;
         _thisText.SetText(LocalizationUISystem.instance.GetText(_textKey));
         AdjustWidth();
     }
 
     private void AdjustWidth()
     {
-        Vector2 _thisSizeDelta = _shell.sizeDelta;
-        _shell.sizeDelta = new Vector2(_thisText.preferredWidth, _thisSizeDelta.y);
+        _shell.sizeDelta = new Vector2(_thisText.preferredWidth, _thisText.preferredHeight + _additionalHeight);
+    }
 
-        // если pivot в центре
-        /*
-         * Vector2 _thisSizeDelta = this.GetComponent<RectTransform>().sizeDelta;
-         * Vector2 _bufSizeDelta = new Vector2(_thisSizeDelta.x, _thisSizeDelta.y);
-         * _thisSizeDelta = new Vector2(_thisText.preferredWidth, _thisSizeDelta.y);
-         * float deltaX = _bufSizeDelta.x - _thisSizeDelta.x;
-         * this.GetComponent<RectTransform>().sizeDelta = _thisSizeDelta;
-
-         * Vector2 _thisAnchoredPosition = this.GetComponent<RectTransform>().anchoredPosition;
-         * this.GetComponent<RectTransform>().anchoredPosition
-         *    = new Vector2(_thisAnchoredPosition.x - deltaX / 2f, _thisAnchoredPosition.y);
-        */
+    private bool IsNull()
+    {
+        if (_thisText == null || _textKey == "" || _shell == null)
+        {
+            SimulationUtilities.DisplayError($"Invalid ui-text object - {_textKey}");
+            return true;
+        }
+        return false;
     }
 }

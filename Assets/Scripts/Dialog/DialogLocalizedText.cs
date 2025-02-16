@@ -4,66 +4,82 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Reflection;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
-public class DialogLocalizedText : MonoBehaviour, IPointerClickHandler
-    //, IPointerEnterHandler, IPointerExitHandler
+internal class DialogLocalizedText : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private string _textKey;
-    [SerializeField] private RectTransform _shell;
+    [SerializeField] private float MAX_WIDTH = 1700f;
+    [SerializeField] private DialogUI _shell;
     [SerializeField] private Image _window;
-    [SerializeField] private Color _enter;
-    [SerializeField] private Color _exit;
 
     private TextMeshProUGUI _thisText;
-    private List<string> _dialogText;
 
     public int TextListSize { get; private set; } = 0;
+    public string CurrentText { get; private set; } = string.Empty;
     public int CurrentIndexText { get; private set; } = 0;
-    public string CurrentText { get; private set; }
+    public bool IsUpdating { get; private set; } = false;
 
+    private Dictionary<string, string[]> _dialogText;
+    private Coroutine _coroutineGetText;
 
     private void Awake()
     {
         _thisText = this.GetComponent<TextMeshProUGUI>();
-        _dialogText = new List<string>();
-        this.gameObject.SetActive(true);
+        RectTransform _thisRectTransform = GetComponent<RectTransform>();
+        _thisRectTransform.sizeDelta = new Vector2(MAX_WIDTH, _thisRectTransform.sizeDelta.y);
+        _dialogText = new();
     }
 
     private void Start()
-    {   
+    {
         ReadDialogFile();
-        UpdateTextAndAdjustWidth();
-        //LocalizationUISystem.LanguageChanged += UpdateTextAndAdjustWidth;
+        UpdateText();
     }
 
     private void OnDestroy()
     {
-        //_thisButton.onClick.RemoveAllListeners();
-        //LocalizationUISystem.LanguageChanged -= UpdateTextAndAdjustWidth;
+
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        UpdateText();
     }
 
     private void ReadDialogFile()
     {
-        _dialogText.Add("Тест1");
-        _dialogText.Add("Тест2");
-        _dialogText.Add("Тест3");
-        //dialogText.Add();
-        TextListSize = _dialogText.Count;
+        var a = DialogSystem.instance.GetText("Test");
+        foreach (FieldInfo s in a.GetType().GetFields())
+        {
+            _dialogText.Add(s.Name, s.GetValue(a) as string[]);
+        }
     }
 
-    public void UpdateTextAndAdjustWidth()
+    public void UpdateText()
     {
+        if (!CheckReadValidity()) return;
+
+        var list = _dialogText[SimulationUtilities.CurrentLanguage];
+        TextListSize = list.Length;
+
+        if (IsUpdating)
+        {
+            StopCoroutine(_coroutineGetText);
+            _thisText.text = CurrentText;
+            SetPreferredHeight();
+            IsUpdating = false;
+            return;
+        }
+
         if (CurrentIndexText < TextListSize)
         {
             _thisText.text = string.Empty;
-            CurrentText = _dialogText[CurrentIndexText];
-            StartCoroutine(GetText());
-            CurrentIndexText = ++CurrentIndexText % TextListSize;
+            CurrentText = list[CurrentIndexText].Trim();
+            _coroutineGetText = StartCoroutine(GetText());
+            SetCurrentIndexText();
+            IsUpdating = true;
         }
-
-        //_thisText.SetText(DialogSystem.instance.GetText(_textKey));
-        AdjustWidth();
     }
 
     private IEnumerator GetText()
@@ -71,47 +87,29 @@ public class DialogLocalizedText : MonoBehaviour, IPointerClickHandler
         foreach (char c in CurrentText)
         {
             _thisText.text += c;
-            yield return new WaitForSeconds(.5f);
+            SetPreferredHeight();
+            yield return new WaitForSeconds(.0001f);
         }
+        IsUpdating = false;
     }
 
-    private void AdjustWidth()
+    private void SetPreferredHeight()
     {
-        _shell.sizeDelta = new Vector2(_shell.sizeDelta.x, _thisText.preferredHeight + 10f);
+        _shell.Height = _thisText.preferredHeight + _shell.AdditionalHeight(_thisText.preferredHeight);
     }
 
-
-
-
-    //public void OnPointerEnter(PointerEventData eventData)
-    //{
-    //    _window.color = _enter;
-    //}
-
-    //public void OnPointerExit(PointerEventData eventData)
-    //{
-    //    _window.color = _exit;
-    //}
-
-    public void OnPointerClick(PointerEventData eventData)
+    private void SetCurrentIndexText()
     {
-        UpdateTextAndAdjustWidth();
+        CurrentIndexText = ++CurrentIndexText % TextListSize;
     }
 
     private bool CheckReadValidity()
     {
-        if (_thisText == null || _textKey == "" || _shell == null)
-        {
-            Debug.LogError($"Invalid ui-text object - {_textKey}");
-            return false;
-        }
-
         if (_dialogText == null || _dialogText.Count <= 0)
         {
             Debug.LogError($"Invalid text array");
             return false;
         }
-
         return true;
     }
 }

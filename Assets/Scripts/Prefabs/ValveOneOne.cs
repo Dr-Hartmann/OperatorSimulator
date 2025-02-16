@@ -14,23 +14,21 @@ internal class ValveOneOne : MonoBehaviour
     [SerializeField] private Sprite _spriteAverage;
     [SerializeField] private Sprite _spriteOpen;
 
-    [Header("Valve state")]
-    [SerializeField] public ValveStates _currentValveState = ValveStates.Close;
-
     [Header("Valve sensors")]
     [SerializeField] private TextMeshProUGUI _openingSensorText;
     [Range(0f, 100f)]
     [SerializeField] private float _openingPercentage = MIN_VALUE_OPENNES;
 
     [Header("Valve settings")]
+    [SerializeField] public ValveStates _currentValveState = ValveStates.Close;
     [SerializeField] private float _openingSpeed = 1f;
     [SerializeField] private float _closingSpeed = .8f;
     [SerializeField] private float _multiplierSoonToEndState = 5f;
 
-    private const float MAX_VALUE_OPENNES = 100f;
-    private const float NEAR_OPEN = 95f;
-    private const float MIN_VALUE_OPENNES = 0f;
-    private const float NEAR_CLOSE = 5f;
+    private static float MAX_VALUE_OPENNES = 100f;
+    private static float NEAR_OPEN = 95f;
+    private static float MIN_VALUE_OPENNES = 0f;
+    private static float NEAR_CLOSE = 5f;
 
     private Image _thisImage;
     private Button _thisButton;
@@ -43,18 +41,17 @@ internal class ValveOneOne : MonoBehaviour
 
     private void Awake()
     {
-        this.gameObject.SetActive(true);
+        _thisButton = GetComponent<Button>();
+        _thisImage = GetComponent<Image>();
+        _thisButton.onClick.AddListener(OnClick);
+
+        if (IsClose()) OpenPercent = 0f;
+        else if (IsOpen()) OpenPercent = 1f;
     }
 
     private void Start()
     {
-        _thisButton = GetComponent<Button>();
-        _thisImage = GetComponent<Image>();
         SimulationSystem.instance.TickPassed += UpdateReadingsSensor;
-        _thisButton.onClick.AddListener(OnClick);
-
-        if(IsClose()) OpenPercent = 0f; 
-        else if(IsOpen())OpenPercent = 1f;
     }
 
     private void OnDestroy()
@@ -65,14 +62,8 @@ internal class ValveOneOne : MonoBehaviour
 
     public void OnClick()
     {
-        if (IsOpen() || IsOpening())
-        {
-            Closing();
-        }
-        else if (IsClose() || IsClosing())
-        {
-            Opening();
-        }
+        if (IsOpen() || IsOpening()) Closing();
+        else if (IsClose() || IsClosing()) Opening();
         else
         {
             SimulationUtilities.DisplayError($"ValveOneOne: The valve is in an unknown state");

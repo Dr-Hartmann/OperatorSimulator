@@ -5,11 +5,14 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 internal class ControlButtonPlayPause : MonoBehaviour
 {
+    [Header("Settings")]
+    [SerializeField] private bool _isPlaying = false;
+
+    [Header("Sprites")]
     [SerializeField] private Image _stopPanel;
     [SerializeField] private Sprite _pauseSprite;
     [SerializeField] private Sprite _playSprite;
-    [SerializeField] private bool _isPlaying = false;
-
+    
     private Image _thisImage;
     private Button _thisButton;
 
@@ -17,12 +20,12 @@ internal class ControlButtonPlayPause : MonoBehaviour
     {
         _thisImage = GetComponent<Image>();
         _thisButton = GetComponent<Button>();
-        this.gameObject.SetActive(true);
+        _thisButton.onClick.AddListener(OnClick);
+        _stopPanel.gameObject.SetActive(!_isPlaying);
     }
 
     private void Start()
     {
-        _thisButton.onClick.AddListener(OnClick);
         if (_isPlaying) StartAndChangeSprite();
         else PauseAndChangeSprite();
     }

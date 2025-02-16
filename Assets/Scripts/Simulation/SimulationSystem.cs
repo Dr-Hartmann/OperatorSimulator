@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 internal class SimulationSystem : MonoBehaviour
 {
-    [Header("Simulation's settings")]
+    [Header("Simulation's settings")] // TODO - сделать раздел настройки
     [SerializeField] private int _targetFramerate = 24;
     [SerializeField] public SimulationStates SimulationState { get; private set; } = SimulationStates.Paused;
     [SerializeField] private TextMeshProUGUI _speedText;
@@ -21,19 +21,11 @@ internal class SimulationSystem : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(this.gameObject);
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = _targetFramerate;
+
+        SetInstance();
+        SimulationStart();
 
         // TODO - переменная частота кадров, файл 'settings.ini'?
         //QualitySettings.vSyncCount = 1;
@@ -42,18 +34,11 @@ internal class SimulationSystem : MonoBehaviour
         //    QualitySettings.vSyncCount = 0;
         //    Application.targetFrameRate = _targetFramerate;
         //}
-
-        this.gameObject.SetActive(true);
-    }
-
-    private void Start()
-    {
-        SimulationStart();
     }
 
     private void Update()
     {
-        _speedText.SetText(CurrentSpeed.ToString());// TODO - убрать отсюда
+        _speedText.SetText(CurrentSpeed.ToString());
 
         if (IsStarted)
         {
@@ -90,11 +75,26 @@ internal class SimulationSystem : MonoBehaviour
 
     // контроль состояния симуляции
     public void SimulationStart() => SimulationState = SimulationStates.Started;
-    public bool IsStarted => SimulationState == SimulationStates.Started;
     public void SimulationPause() => SimulationState = SimulationStates.Paused;
-    public bool IsPaused => SimulationState == SimulationStates.Paused;
     public void SimulationStop() => SimulationState = SimulationStates.Stopped;
+
+    public bool IsStarted => SimulationState == SimulationStates.Started;
+    public bool IsPaused => SimulationState == SimulationStates.Paused;
     public bool IsStopped => SimulationState == SimulationStates.Stopped;
+
+    private void SetInstance()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+    }
 }
 
 //#if ENABLE_INPUT_SYSTEM && (UNITY_IOS || UNITY_ANDROID)
