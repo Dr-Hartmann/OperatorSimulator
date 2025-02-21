@@ -1,115 +1,164 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
-using System.Reflection;
+
+// TODO - ускорить корутину
 
 [RequireComponent(typeof(TextMeshProUGUI))]
-internal class DialogLocalizedText : MonoBehaviour, IPointerClickHandler
+public class DialogLocalizedText : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private float MAX_WIDTH = 1700f;
-    [SerializeField] private DialogUI _shell;
-    [SerializeField] private Image _window;
+    //[SerializeField] private float MAX_WIDTH = 1700f;
+    [SerializeField] private float _minHeight = 200f;
+    [SerializeField] private float _maxHeight = 700f;
+    [SerializeField] private float _additionalHeight = 100f;
 
+    public static DialogLocalizedText Instance { get; private set; } = null;
+
+    private Coroutine _routine;
     private TextMeshProUGUI _thisText;
+    private RectTransform _parent;
+    private Dictionary<string, List<string>> _dialogText;
 
-    public int TextListSize { get; private set; } = 0;
-    public string CurrentText { get; private set; } = string.Empty;
-    public int CurrentIndexText { get; private set; } = 0;
-    public bool IsUpdating { get; private set; } = false;
 
-    private Dictionary<string, string[]> _dialogText;
-    private Coroutine _coroutineGetText;
+    public string Key { get; private set; } = "Test";
+    public void StartDialog(string key)
+    {
+        Key = key;
+        if (!DialogSystem.Instance.ReadJSON(TipPath)) return;
+        SwitchText();
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        SwitchText();
+    }
+
+    
+    private string TipPath
+    {
+        get => _tipPath;
+        set => _tipPath = "Tip/" + value;
+    }
+    private float SetParentHeight
+    {
+        get => _currentHeight;
+        set
+        {
+            _currentHeight = value;
+            if (_currentHeight < _minHeight) _currentHeight = _minHeight;
+            else if (_currentHeight > _maxHeight) _currentHeight = _maxHeight;
+            _parent.sizeDelta = new Vector2(_parent.sizeDelta.x, _currentHeight);
+        }
+    }
+
 
     private void Awake()
     {
+        if (!SetInstance()) return;
         _thisText = this.GetComponent<TextMeshProUGUI>();
-        RectTransform _thisRectTransform = GetComponent<RectTransform>();
-        _thisRectTransform.sizeDelta = new Vector2(MAX_WIDTH, _thisRectTransform.sizeDelta.y);
+        _parent = GameObject.FindGameObjectWithTag("Dialog").GetComponentInParent<RectTransform>();
+        //RectTransform _thisRectTransform = GetComponent<RectTransform>();
+        //_thisRectTransform.sizeDelta = new Vector2(MAX_WIDTH, _thisRectTransform.sizeDelta.y);
         _dialogText = new();
+        
     }
-
     private void Start()
     {
-        ReadDialogFile();
-        UpdateText();
+        SetParentHeight = _minHeight;
     }
-
-    private void OnDestroy()
+    private void SwitchText()
     {
-
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        UpdateText();
-    }
-
-    private void ReadDialogFile()
-    {
-        var a = DialogSystem.instance.GetText("Test");
-        foreach (FieldInfo s in a.GetType().GetFields())
+        if (_isUpdating)
         {
-            _dialogText.Add(s.Name, s.GetValue(a) as string[]);
-        }
-    }
-
-    public void UpdateText()
-    {
-        if (!CheckReadValidity()) return;
-
-        var list = _dialogText[SimulationUtilities.CurrentLanguage];
-        TextListSize = list.Length;
-
-        if (IsUpdating)
-        {
-            StopCoroutine(_coroutineGetText);
-            _thisText.text = CurrentText;
+            StopCoroutine(_routine);
+            _thisText.text = _currentText;
             SetPreferredHeight();
-            IsUpdating = false;
+            _isUpdating = false;
             return;
         }
 
-        if (CurrentIndexText < TextListSize)
+        SetDialogText();
+        
+        List<string> list = new();
+        if (!GetLanguageTextAndCheck(ref list)) return;
+        if (IsListEmpty(list)) return;
+
+        _currentListSize = list.Count;
+        if (_currentListIndex < _currentListSize)
         {
-            _thisText.text = string.Empty;
-            CurrentText = list[CurrentIndexText].Trim();
-            _coroutineGetText = StartCoroutine(GetText());
-            SetCurrentIndexText();
-            IsUpdating = true;
+            _thisText.text = string.Empty;  
+            _currentText = list[_currentListIndex].Trim();
+            _routine = StartCoroutine(PrintText());
+            NextIndexText();
+            _isUpdating = true;
         }
     }
-
-    private IEnumerator GetText()
+    private IEnumerator PrintText()
     {
-        foreach (char c in CurrentText)
+        foreach (char c in _currentText)
         {
             _thisText.text += c;
             SetPreferredHeight();
-            yield return new WaitForSeconds(.0001f);
+            yield return new WaitForSecondsRealtime(.01f);
         }
-        IsUpdating = false;
+        _isUpdating = false;
     }
+
 
     private void SetPreferredHeight()
     {
-        _shell.Height = _thisText.preferredHeight + _shell.AdditionalHeight(_thisText.preferredHeight);
+        float addHeight = _thisText.preferredHeight < _minHeight - _additionalHeight ? 0 : _additionalHeight;
+        SetParentHeight = _thisText.preferredHeight + addHeight;
+    }
+    private void NextIndexText()
+    {
+        _currentListIndex = ++_currentListIndex % _currentListSize;
     }
 
-    private void SetCurrentIndexText()
-    {
-        CurrentIndexText = ++CurrentIndexText % TextListSize;
-    }
 
-    private bool CheckReadValidity()
+    private void SetDialogText()
     {
-        if (_dialogText == null || _dialogText.Count <= 0)
+        _dialogText = new(DialogSystem.Instance.GetDialog(Key));
+        if (_dialogText.Count <= 0)
         {
-            Debug.LogError($"Invalid text array");
+            SimulationUtilities.DisplayError($"Dictionary is empty - {Key}");
+            _dialogText = new(DialogSystem.Instance.GetDialog("null"));
+        }
+    }
+    private bool GetLanguageTextAndCheck(ref List<string> list)
+    {
+        if (!_dialogText.TryGetValue(SimulationUtilities.CurrentLanguage, out list))
+        {
+            SimulationUtilities.DisplayWarning($"Language does not exist");
             return false;
         }
         return true;
     }
+    private bool IsListEmpty(List<string> list)
+    {
+        if (list.Count <= 0)
+        {
+            SimulationUtilities.DisplayError($"Language list is empty");
+            return true;
+        }
+        return false;
+    }
+    private bool SetInstance()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            return true;
+        }
+        Destroy(this.gameObject);
+        return false;
+    }
+
+    private float _currentHeight;
+    private string _tipPath = "Tip/tip";
+    private int _currentListSize;
+    private int _currentListIndex = 0;
+    private string _currentText = string.Empty;
+    private bool _isUpdating = false;
 }

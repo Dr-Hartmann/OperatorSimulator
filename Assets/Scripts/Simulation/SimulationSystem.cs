@@ -1,46 +1,43 @@
 using System;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-internal class SimulationSystem : MonoBehaviour
+// TODO - сделать переменну€ частоту кадров, файл 'settings.ini'?
+// TODO - сделать раздел "настройки"
+// TODO - time scale это что?
+
+public class SimulationSystem : MonoBehaviour
 {
-    [Header("Simulation's settings")] // TODO - сделать раздел настройки
+    [Header("Simulation's settings")]
     [SerializeField] private int _targetFramerate = 24;
-    [SerializeField] public SimulationStates SimulationState { get; private set; } = SimulationStates.Paused;
-    [SerializeField] private TextMeshProUGUI _speedText;
+    [SerializeField] private SimulationStates _simulationState = SimulationStates.Pause;
 
     [Header("Speed constants")]
     [SerializeField] private float MAX_SPEED = 4f;
     [SerializeField] private float MIN_SPEED = 0f;
     [SerializeField] private float SPEED_CHANGE_STEP = .25f;
 
-    public static SimulationSystem instance { get; private set; }
+    public static SimulationSystem Instance { get; private set; }
     public float CurrentSpeed { get; private set; } = 1f;
     public Action<float> TickPassed;
+    public Action<bool> Played;
 
     private void Awake()
     {
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = _targetFramerate;
 
-        SetInstance();
-        SimulationStart();
+        if (!SetInstance()) return;
+    }
 
-        // TODO - переменна€ частота кадров, файл 'settings.ini'?
-        //QualitySettings.vSyncCount = 1;
-        //if (Application.targetFrameRate > _targetFramerate - 1)
-        //{
-        //    QualitySettings.vSyncCount = 0;
-        //    Application.targetFrameRate = _targetFramerate;
-        //}
+    private void Start()
+    {
+        SetState(_simulationState);
     }
 
     private void Update()
     {
-        _speedText.SetText(CurrentSpeed.ToString());
-
-        if (IsStarted)
+        if (IsPlayed)
         {
             TickPassed?.Invoke(Time.deltaTime * CurrentSpeed);
         }
@@ -55,45 +52,85 @@ internal class SimulationSystem : MonoBehaviour
         }
     }
 
-    // контроль скорости симул€ции
-    public void SpeedSet(float speed)
+    public void SetSpeed(SimulationSpeedStates state, float speed = 0)
     {
-        if (speed < MIN_SPEED) CurrentSpeed = MIN_SPEED;
-        else if (speed > MAX_SPEED) CurrentSpeed = MAX_SPEED;
-        else CurrentSpeed = speed;
-    }
-    public void SpeedIncrease()
-    {
-        CurrentSpeed += SPEED_CHANGE_STEP;
+        switch (state)
+        {
+            case SimulationSpeedStates.Set:
+                CurrentSpeed = speed;
+                break;
+
+            case SimulationSpeedStates.Increase:
+                CurrentSpeed += SPEED_CHANGE_STEP;
+                break;
+
+            case SimulationSpeedStates.Decrease:
+                CurrentSpeed -= SPEED_CHANGE_STEP;
+                break;
+
+            default:
+                SimulationUtilities.DisplayWarning("Unknown state");
+                break;
+        }
         if (CurrentSpeed > MAX_SPEED) CurrentSpeed = MAX_SPEED;
+        else if (CurrentSpeed < MIN_SPEED) CurrentSpeed = MIN_SPEED;
     }
-    public void SpeedDecrease()
+    public void SetState(SimulationStates state)
     {
-        CurrentSpeed -= SPEED_CHANGE_STEP;
-        if (CurrentSpeed < MIN_SPEED) CurrentSpeed = MIN_SPEED;
-    }
-
-    // контроль состо€ни€ симул€ции
-    public void SimulationStart() => SimulationState = SimulationStates.Started;
-    public void SimulationPause() => SimulationState = SimulationStates.Paused;
-    public void SimulationStop() => SimulationState = SimulationStates.Stopped;
-
-    public bool IsStarted => SimulationState == SimulationStates.Started;
-    public bool IsPaused => SimulationState == SimulationStates.Paused;
-    public bool IsStopped => SimulationState == SimulationStates.Stopped;
-
-    private void SetInstance()
-    {
-        if (instance == null)
+        switch (state)
         {
-            instance = this;
+            case SimulationStates.Play:
+                //Time.timeScale = 1;
+                Played?.Invoke(true);
+
+                break;
+
+            case SimulationStates.Pause:
+                //Time.timeScale = 0;
+                Played?.Invoke(false);
+
+                break;
+
+            case SimulationStates.Stop:
+
+                break;
+
+            default:
+                SimulationUtilities.DisplayWarning("Unknown state");
+                _simulationState = SimulationStates.Pause;
+                return;
+        }
+        _simulationState = state;
+    }
+    public void ReversePlayPause()
+    {
+        if (IsPlayed) SetState(SimulationStates.Pause);
+        else SetState(SimulationStates.Play);
+    }
+
+    public bool IsPlayed
+    {
+        get => _simulationState == SimulationStates.Play;
+    }
+    public bool IsPaused
+    {
+        get => _simulationState == SimulationStates.Pause;
+    }
+    public bool IsStopped
+    {
+        get => _simulationState == SimulationStates.Stop;
+    }
+
+    private bool SetInstance()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
             DontDestroyOnLoad(this.gameObject);
+            return true;
         }
-        else
-        {
-            Destroy(this.gameObject);
-            return;
-        }
+        Destroy(this.gameObject);
+        return false;
     }
 }
 

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 697220117720918613}
   - component: {fileID: 9066635673222747055}
   - component: {fileID: 8335910998136264321}
-  - component: {fileID: 5138739179736286624}
   m_Layer: 5
   m_Name: ControlPanel
   m_TagString: Untagged
@@ -94,18 +93,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding: {x: 0, y: 0, z: 0, w: 0}
   m_Softness: {x: 0, y: 0}
---- !u!114 &5138739179736286624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2860156311566740716}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a05acb739908968408b6d6093d8b7fc4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &3191329929191987223
 GameObject:
   m_ObjectHideFlags: 0
@@ -173,7 +160,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1474923350, guid: 1b08adaa52f8de146a4540d9cee30341, type: 3}
+  m_Sprite: {fileID: 650656284835190746, guid: 855945459d5074d4e84a5a625668a433, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -236,7 +223,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3191329929191987223}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 719d8ff2a2da36b43a0fd80d8cec6cb6, type: 3}
+  m_Script: {fileID: 11500000, guid: e867cfff9029e63428be95b633984d0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4783709504990849952
@@ -253,7 +240,7 @@ GameObject:
   - component: {fileID: 2956689482896193719}
   - component: {fileID: 8615704435630397231}
   m_Layer: 5
-  m_Name: Pause
+  m_Name: PlayPause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -369,11 +356,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4783709504990849952}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cca1b4e1ce64f61458e7380f1d7ce375, type: 3}
+  m_Script: {fileID: 11500000, guid: 015606aba652191469e01aba4e11aaa0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isPlaying: 1
-  _stopPanel: {fileID: 0}
+  _isPaused: 1
   _pauseSprite: {fileID: -513916717, guid: c862e77854a120746b5b6eae92029214, type: 3}
   _playSprite: {fileID: 1446499372, guid: 6b7b7670d5faec04f9d0a41c5dee556e, type: 3}
 --- !u!1 &7269436747204865045
@@ -443,7 +429,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1219884123, guid: 1b08adaa52f8de146a4540d9cee30341, type: 3}
+  m_Sprite: {fileID: 4009284081192125275, guid: 855945459d5074d4e84a5a625668a433, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -506,6 +492,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 7269436747204865045}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ace13f0f803a3c940860d128b12fe272, type: 3}
+  m_Script: {fileID: 11500000, guid: 1b8ee54f23a615a4eb7ce0df66dc6a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

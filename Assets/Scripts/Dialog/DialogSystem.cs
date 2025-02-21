@@ -2,65 +2,55 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine;
 
-internal class DialogSystem : MonoBehaviour
+/// <summary>
+/// Организует чтение .json-файла в класс <see cref="DialogJSON"/> и получение нужного набора по ключу.
+/// </summary>
+public class DialogSystem : MonoBehaviour, IDialogSystem
 {
-    [SerializeField] private string _tipPath;
+    public static IDialogSystem Instance { get; private set; }
+    private DialogJSON _dialog;
 
-    public static DialogSystem instance { get; private set; }
 
-    private Dictionary<string, DialogText> _text;
-
-    private void Awake()
+    public bool ReadJSON(string path)
     {
-        if (!SetInstance()) return;
-        if (!ReadJSON(_tipPath)) return;
-    }
-
-    private void Start()
-    {
-        if (IsInstanceNull()) return;
-    }
-
-    private bool ReadJSON(string path)
-    {
-        //string json = JsonConvert.SerializeObject(dialogLoaclizedJSON, Formatting.Indented);
         TextAsset json = Resources.Load(path) as TextAsset;
         if (json.text == "")
         {
             SimulationUtilities.DisplayError("Path is empty");
             return false;
         }
-        _text = JsonConvert.DeserializeObject<Dictionary<string, DialogText>>(json.text);
-
+        _dialog = JsonConvert.DeserializeObject<DialogJSON>(json.text);
         return true;
     }
-
-    public DialogText GetText(string key)
+    public Dictionary<string, List<string>> GetDialog(string key)
     {
-        DialogText text = null;
-        _text.TryGetValue(key, out text);
-        return text;
+        return _dialog.text[key];
     }
 
+    private void Awake()
+    {
+        if (!SetInstance()) return;
+        _dialog = new();
+    }
+
+    public bool IsDialogEmpty()
+    {
+        if (_dialog.text.Count <= 0)
+        {
+            SimulationUtilities.DisplayError("Dialog is empty");
+            return true;
+        }
+        return false;
+    }
     private bool SetInstance()
     {
-        if (instance == null)
+        if (Instance == null)
         {
-            instance = this;
+            Instance = this;
             DontDestroyOnLoad(this.gameObject);
             return true;
         }
         Destroy(this.gameObject);
-        return false;
-    }
-
-    public bool IsInstanceNull()
-    {
-        if (instance == null)
-        {
-            SimulationUtilities.DisplayError("Instance is null");
-            return true;
-        }
         return false;
     }
 }

@@ -1,6 +1,6 @@
-internal enum SimulationStates
+public enum SimulationStates
 {
-    Started,
-    Paused,
-    Stopped
+    Play,
+    Pause,
+    Stop
 }

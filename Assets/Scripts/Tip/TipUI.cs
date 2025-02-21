@@ -1,48 +1,55 @@
 using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(RectTransform))]
 public class TipUI : MonoBehaviour
-{
-    [SerializeField] private TextMeshProUGUI _text;
-
-    private RectTransform _thisRectTransform;
-    private float CreationTime { get; set; }
-
+{    
     public float Lifetime { get; set; } = 20f;
-    public int Index { get; set; }
-    public string Message { get; set; } = "-";
+    public int Index { get; set; } = 0;
+    public string Message
+    {
+        get => _message;
+        set
+        {
+            _message = value;
+            AdjustWidth();
+        }
+    }
+
+    private float _creationTime;
+    private string _message = "__message__";
+    private RectTransform _thisRectTransform;
+    private TextMeshProUGUI _text;
+    
 
     private void Awake()
     {
         _thisRectTransform = GetComponent<RectTransform>();
-        this.gameObject.SetActive(true);
+        _text = GetComponentInChildren<TextMeshProUGUI>();
+        _creationTime = Time.time;
     }
 
     private void Start()
     {
-        CreationTime = Time.time;
         _text.text = Message;
-        AdjustWidth();
     }
 
     private void Update()
     {
-        if (Time.time - CreationTime > Lifetime) Destroy(this.gameObject);
+        if (Time.time - _creationTime > Lifetime)
+        {
+            Destroy(this.gameObject);
+        }
     }
 
-    public static void CreateTip(string message)
+    private static void OnDestroy()
     {
-        TipUISystem.instance.MessageDisplayed?.Invoke(message);
-    }
-
-    private void OnDestroy()
-    {
-        TipUISystem.instance.MessageDeleted?.Invoke();
+        TipSystem.instance.MessageDeleted?.Invoke();
     }
 
     private void AdjustWidth()
     {
-        _thisRectTransform.sizeDelta = new Vector2(_thisRectTransform.sizeDelta.x, _text.preferredHeight);
+        _thisRectTransform.sizeDelta
+            = new Vector2(_thisRectTransform.sizeDelta.x, _text.preferredHeight);
     }
-
 }
