@@ -1,3 +1,0 @@
-UI.Speed===Simulation speed:</END>
-UI.Localization===Language\n</END>
-UI.Stop===Simulation is stopped</END>

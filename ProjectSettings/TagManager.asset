@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - Dialog
+  - DialogField1
+  - Canvas
   layers:
   - Default
   - TransparentFX
