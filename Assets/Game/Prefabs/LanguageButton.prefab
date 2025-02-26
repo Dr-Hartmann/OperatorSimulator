@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5112731136010244168}
   - component: {fileID: 5616328918062749307}
   - component: {fileID: 1188715418118668808}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: UI.Localization
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 7662710603649927297}
   - component: {fileID: 8681177789588635725}
   - component: {fileID: 4405344591018181365}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: LanguageButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}

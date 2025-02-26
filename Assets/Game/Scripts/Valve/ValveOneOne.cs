@@ -2,10 +2,11 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SimulationCore;
 
 // TODO - сделать курву для нелиненой зависимости открытости клапана
 
-[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(Button))]
 public sealed class ValveOneOne : MonoBehaviour, IValve
 {
@@ -25,7 +26,7 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     [SerializeField] private float _closingSpeed = .8f;
     [SerializeField] private float _multiplierSoonToEndState = 5f;
 
-    private Image _thisImage;
+    private SpriteRenderer _thisImage;
     private Button _thisButton;
     private TextMeshProUGUI _openingSensorText;
 
@@ -59,14 +60,14 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
         else if (IsClose || IsClosing) ChangeStateAndSprite(ValveStates.Opening, _spriteAverage);
         else
         {
-            SimulationUtilities.DisplayWarning($"Valve is in an unknown state");
+            GameUtilities.DisplayWarning($"Valve is in an unknown state");
             return;
         }
     }
     private void Awake()
     {
         _thisButton = GetComponent<Button>();
-        _thisImage = GetComponent<Image>();
+        _thisImage = GetComponent<SpriteRenderer>();
         _openingSensorText = GetComponentInChildren<RectTransform>()
             .GetComponentInChildren<TextMeshProUGUI>();
 
@@ -75,13 +76,11 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     }
     private void OnEnable()
     {
-        SimulationSystem.TickPassed += UpdateValve;
-        _thisButton.onClick.AddListener(OnClick);
+        SubscribeAll();
     }
     private void OnDisable()
     {
-        SimulationSystem.TickPassed -= UpdateValve;
-        _thisButton.onClick.RemoveAllListeners();
+        UnsubscribeAll();
     }
     private void OnDestroy()
     {
@@ -97,8 +96,6 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
         if (OpenPercent >= MAX_VALUE_OPENNES) Open();
         else if (OpenPercent <= MIN_VALUE_OPENNES) Close();
     }
-
-
     private void Add(float tick)
     {
         AddSub
@@ -120,8 +117,6 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
         if (OpenPercent >= NEAR_OPEN || OpenPercent <= NEAR_CLOSE) near();
         else other();
     }
-
-
     private void Open()
     {
         OpenPercent = MAX_VALUE_OPENNES;
@@ -136,6 +131,17 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     {
         _currentValveState = state;
         _thisImage.sprite = sprite;
+    }
+    private void SubscribeAll()
+    {
+        UnsubscribeAll();
+        ISimulationSystem.TickPassed += UpdateValve;
+        _thisButton.onClick.AddListener(OnClick);
+    }
+    private void UnsubscribeAll()
+    {
+        ISimulationSystem.TickPassed -= UpdateValve;
+        _thisButton.onClick.RemoveAllListeners();
     }
 
 

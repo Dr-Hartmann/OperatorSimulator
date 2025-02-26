@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5087847234844685102}
   - component: {fileID: 1230471687584196457}
   - component: {fileID: 1700557083722667146}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Value
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -164,7 +164,7 @@ GameObject:
   - component: {fileID: 7750712993648612435}
   - component: {fileID: 2073640227215966927}
   - component: {fileID: 2617471429867303984}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: UI.Speed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -326,7 +326,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 718384841714651548}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Speed
   m_TagString: Untagged
   m_Icon: {fileID: 0}

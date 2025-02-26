@@ -56,7 +56,7 @@ public class LocalizedText : MonoBehaviour
     {
         if (_text == null || _key == "" || _parent == null)
         {
-            SimulationUtilities.DisplayWarning($"Invalid ui-text object - {_key}");
+            GameUtilities.DisplayWarning($"Invalid ui-text object - {_key}");
             return true;
         }
         return false;

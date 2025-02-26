@@ -1,101 +1,172 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using PlayerSpace;
+using SimulationCore;
+using System.Threading.Tasks;
 
+[RequireComponent(typeof(Player))]
 public class InputSystemController : MonoBehaviour
 {
     [SerializeField] private GameObject _prefabDialog;
 
-    private InputSystemActions _playerInput;
+    private InputSystem_Actions _inputActions;
+    private InputSystem_Actions.UIActions _uiAct;
+    private InputSystem_Actions.PlayerActions _playerAct;
+
+    private Player player;
     private RectTransform _canvas;
+    private bool _canCancel = true;
 
-    [SerializeField] private Player player;
-    
 
-    private void PlayPause(InputAction.CallbackContext context)
+    public void SetCanCancel()
     {
-        SimulationSystem.Instance?.ReversePlayPause();
+        _canCancel = true;
     }
-    private void SpeedMore(InputAction.CallbackContext context)
+    public void SetCannotCancel()
     {
-        SimulationSystem.Instance?.SetSpeed(SimulationSpeedStates.Increase);
+        _canCancel = false;
     }
-    private void SpeedLess(InputAction.CallbackContext context)
+
+
+    public void SubscribeAll()
     {
-        SimulationSystem.Instance?.SetSpeed(SimulationSpeedStates.Decrease);
+        UnsubscribeAll();
+        SubscribePlayer();
+        SubscribeUI();
     }
-    private void StartDialog(InputAction.CallbackContext context)
-    { 
+    public void UnsubscribeAll()
+    {
+        UnsubscribePlayer();
+        UnsubscribeUI();
+    }
+    public void SubscribeUI()
+    {
+        _uiAct.PlayPause.performed += context => PlayPause();
+        _uiAct.SpeedMore.performed += context => SpeedMore();
+        _uiAct.SpeedLess.performed += context => SpeedLess();
+        _uiAct.Restart.performed += context => Restart();
+    }
+    public void UnsubscribeUI()
+    {
+        _uiAct.PlayPause.performed -= context => PlayPause();
+        _uiAct.SpeedMore.performed -= context => SpeedMore();
+        _uiAct.SpeedLess.performed -= context => SpeedLess();
+        _uiAct.Restart.performed -= context => Restart();
+    }
+    public void SubscribePlayer()
+    {
+        _playerAct.Interact.performed += context => StartDialog();
+
+        _playerAct.Move.started += context => MoveStarted();
+        _playerAct.Move.performed += context => MovePerformed(context.ReadValue<Vector2>());
+        _playerAct.Move.canceled += context => MoveCanceled();
+
+        _playerAct.Attack.started += context => AttackStarted();
+        //_playerAct.Attack.performed += context => AttackPerformed();
+        _playerAct.Attack.canceled += context => AttackCanceled();
+    }
+    public void UnsubscribePlayer()
+    {
+        _playerAct.Interact.performed -= context => StartDialog();
+
+        _playerAct.Move.started -= context => MoveStarted();
+        _playerAct.Move.performed -= context => MovePerformed(context.ReadValue<Vector2>());
+        _playerAct.Move.canceled -= context => MoveCanceled();
+
+        _playerAct.Attack.started -= context => AttackStarted();
+        //_playerAct.Attack.performed -= context => AttackPerformed();
+        _playerAct.Attack.canceled -= context => AttackCanceled();
+    }
+
+
+    private void Awake()
+    {
+        _canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>();
+        player = GetComponent<Player>();
+        _inputActions = new();
+        _uiAct = _inputActions.UI;
+        _playerAct = _inputActions.Player;
+
+        SubscribeAll();
+        _uiAct.Enable();
+        _playerAct.Enable();
+    }
+    private void OnDestroy()
+    {
+        UnsubscribeAll();
+        _uiAct.Disable();
+        _playerAct.Disable();
+    }
+    private async Task Delay()
+    {
+        await Task.Run(() => { while (!_canCancel) { }; return; });
+    }
+
+
+    private void StartDialog()
+    {
         if (GameObject.FindGameObjectWithTag(_prefabDialog.tag)) return;
         GameObject obj = Instantiate(_prefabDialog, _canvas);
         Dialog txt = obj.GetComponentInChildren<Dialog>();
         txt.Path = "Dialog/greeting";
         txt.StartDialog("test");
     }
-    private void Restart(InputAction.CallbackContext context)
+
+    private async void MoveStarted()
     {
-        SimulationSystem.Instance?.SetState(SimulationStates.Stop);
+        await Delay();
+        //Debug.Log("MoveStart");
+        player.SetBehaviorMoving();
+    }
+    private async void MovePerformed(Vector2 vector)
+    {
+        await Delay();
+        //Debug.Log("MovePerf");
+        if (player.IsMoving()) player.MoveVector = vector;
+        else MoveCanceled();
+    }
+    private async void MoveCanceled()
+    {
+        await Delay();
+        Debug.Log("MoveCancel");
+        player.SetBehaviorByDefault();
+    }
+    private void AttackStarted()
+    {
+        Debug.Log("AttackStart");
+        player.SetBehaviorAttacking();
+        SetCannotCancel();
+    }
+    //private void AttackPerformed()
+    //{
+    //    //Debug.Log("AttackPerf");
+    //}
+    private async void AttackCanceled()
+    {
+        await Delay();
+        Debug.Log("AttackCancel");
+        if (player.IsIdle()) player.SetBehaviorIdle();
+        else if (player.IsMoving()) player.SetBehaviorMoving();
+        else player.SetBehaviorByDefault();
+        SetCanCancel();
     }
 
-    private void E(InputAction.CallbackContext context)
+    private void PlayPause()
     {
-        player.SetBehaviorIdle();
+        ISimulationSystem.ReversePlayPause();
+        player.UpdateAnimatorSpeed();
     }
-    private void C(InputAction.CallbackContext context)
+    private void SpeedMore()
     {
-        player.SetBehaviorActive();
+        ISimulationSystem.SetSpeed(SimulationSpeedStates.Increase);
+        player.UpdateAnimatorSpeed();
     }
-    private void Space(InputAction.CallbackContext context)
+    private void SpeedLess()
     {
-        player.SetBehaviorAggressive();
+        ISimulationSystem.SetSpeed(SimulationSpeedStates.Decrease);
+        player.UpdateAnimatorSpeed();
     }
-
-    private void SubscribeAll()
+    private void Restart()
     {
-        _playerInput.UI.PlayPause.performed += PlayPause;
-        _playerInput.UI.SpeedMore.performed += SpeedMore;
-        _playerInput.UI.SpeedLess.performed += SpeedLess;
-        _playerInput.UI.Restart.performed += Restart;
-
-        _playerInput.Player.Interact.performed += StartDialog;
-
-        _playerInput.Player.Interact.performed += E;
-        _playerInput.Player.Crouch.performed += C;
-        _playerInput.Player.Jump.performed += Space;
-    }
-    private void UnsubscribeAll()
-    {
-        _playerInput.UI.PlayPause.performed -= PlayPause;
-        _playerInput.UI.SpeedMore.performed -= SpeedMore;
-        _playerInput.UI.SpeedLess.performed -= SpeedLess;
-        _playerInput.UI.Restart.performed -= Restart;
-
-        _playerInput.Player.Interact.performed -= StartDialog;
-
-        _playerInput.Player.Interact.performed -= E;
-        _playerInput.Player.Crouch.performed -= C;
-        _playerInput.Player.Jump.performed -= Space;
-    }
-
-    private void Awake()
-    {
-        _canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponentInParent<RectTransform>();
-        _playerInput = new();
-    }
-    
-    private void OnEnable()
-    {
-        _playerInput.UI.Enable();
-        _playerInput.Player.Enable();
-        SubscribeAll();
-    }
-    private void OnDisable()
-    {
-        _playerInput.UI.Disable();
-        _playerInput.Player.Disable();
-        UnsubscribeAll();
-    }
-    private void OnDestroy()
-    {
-        OnDisable();
+        ISimulationSystem.SetState(SimulationStates.Stop);
     }
 }

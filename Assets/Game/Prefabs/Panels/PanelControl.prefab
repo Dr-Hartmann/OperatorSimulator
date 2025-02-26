@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9066635673222747055}
   - component: {fileID: 8335910998136264321}
   - component: {fileID: 7150898101098896935}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: PanelControl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 5961094136387824360}
   - component: {fileID: 3682183642047556839}
   - component: {fileID: 8051073423229601706}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Less
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -242,9 +242,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6734905171756827609}
   - component: {fileID: 5587330807798723454}
-  - component: {fileID: 3271629158242887708}
+  - component: {fileID: 8042132111832296959}
   - component: {fileID: 2956689482896193719}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: PlayPause
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -260,7 +260,7 @@ RectTransform:
   m_GameObject: {fileID: 4783709504990849952}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalScale: {x: 0.8000001, y: 0.8000001, z: 0.8000001}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6947717348358453972}
@@ -278,7 +278,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4783709504990849952}
   m_CullTransparentMesh: 1
---- !u!114 &3271629158242887708
+--- !u!114 &8042132111832296959
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -348,7 +348,7 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 3271629158242887708}
+  m_TargetGraphic: {fileID: 8042132111832296959}
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
@@ -364,7 +364,7 @@ GameObject:
   - component: {fileID: 9182446226238087245}
   - component: {fileID: 3171671577749177286}
   - component: {fileID: 7801908129968859542}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: More
   m_TagString: Untagged
   m_Icon: {fileID: 0}

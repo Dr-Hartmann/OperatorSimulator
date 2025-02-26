@@ -2,7 +2,7 @@
 using UnityEngine;
 #endif
 
-public static class SimulationUtilities
+public static class GameUtilities
 {
     public const string DEFAULT_LANGUAGE = "en";
 
@@ -27,6 +27,7 @@ public static class SimulationUtilities
         Debug.LogError(message);
 #endif
     }
+
 
     // TODO - существование приводит к работе смены языков на второй клик
     //[RuntimeInitializeOnLoadMethod]

@@ -1,28 +1,11 @@
-﻿using UnityEngine;
-public class PlayerBehaviorIdle : IPlayerBehavior
+﻿using System;
+
+namespace PlayerBehaviors
 {
-    public void Attack()
+    public class PlayerBehaviorIdle : PlayerBehavior
     {
-        throw new System.NotImplementedException();
-    }
+        public PlayerBehaviorIdle(Action enter, Action exit, Action update)
+            : base(enter, exit, update) { }
 
-    public void Defense()
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public void Enter()
-    {
-        Debug.Log("Enter IDLE");
-    }
-
-    public void Exit()
-    {
-        Debug.Log("Exit IDLE");
-    }
-
-    public void Update()
-    {
-        Debug.Log("Update IDLE");
     }
 }

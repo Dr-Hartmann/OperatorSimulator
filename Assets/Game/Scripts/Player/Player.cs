@@ -1,72 +1,150 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
+using System;
+using SimulationCore;
+using PlayerBehaviors;
 
-public class Player : MonoBehaviour
+namespace PlayerSpace
 {
-    private Dictionary<Type, IPlayerBehavior> behaviorMap;
-    private IPlayerBehavior behaviorCurrent;
-
-    private void Start()
+    [RequireComponent(typeof(Rigidbody2D))]
+    public class Player : MonoBehaviour
     {
-        InitBehaviors();
-        SetBehaviorByDefault();
-    }
+        [SerializeField] private float _speed = 8f;
 
-    private void Update()
-    {
-        if (behaviorCurrent != null)
+        public Vector2 MoveVector { get; set; }
+
+        public void SetBehaviorIdle()
         {
-            behaviorCurrent.Update();
+            SetBehavior(GetBehavior<PlayerBehaviorIdle>());
         }
-    }
-
-    private void InitBehaviors()
-    {
-        behaviorMap = new();
-
-        behaviorMap[typeof(PlayerBehaviorIdle)] = new PlayerBehaviorIdle();
-        behaviorMap[typeof(PlayerBehaviorActive)] = new PlayerBehaviorActive();
-        behaviorMap[typeof(PlayerBehaviorAggressive)] = new PlayerBehaviorAggressive();
-    }
-
-    private void SetBehavior(IPlayerBehavior newBehavior)
-    {
-        if(behaviorCurrent != null)
+        public void SetBehaviorMoving()
         {
-            behaviorCurrent.Exit();
+            SetBehavior(GetBehavior<PlayerBehaviorMoving>());
+        }
+        public void SetBehaviorAttacking()
+        {
+            SetBehavior(GetBehavior<PlayerBehaviorAttacking>());
+        }
+        public void SetBehaviorByDefault()
+        {
+            SetBehaviorIdle();
+        }
+        public void UpdateAnimatorSpeed()
+        {
+            float newSpeed = 1 * ISimulationSystem.CurrentSpeed;
+            if (newSpeed > 0) _animator.speed = newSpeed;
+            else _animator.speed = -newSpeed;
         }
 
-        behaviorCurrent = newBehavior;
-        behaviorCurrent.Enter();
-    }
+        public void EnterIdle()
+        {
+            _animator.SetBool(_isIdle, true);
+            _animator.SetBool(_isMove, false);
+        }
+        public void UpdateIdle()
+        {
 
-    private void SetBehaviorByDefault()
-    {
-        SetBehaviorIdle();
-    }
+        }
+        public void ExitIdle()
+        {
 
-    private IPlayerBehavior GetBehavior<T>() where T : IPlayerBehavior
-    {
-        var type = typeof(T);
-        return behaviorMap[type];
-    }
+        }
 
-    public void SetBehaviorIdle()
-    {
-        var behavoir = GetBehavior<PlayerBehaviorIdle>();
-        SetBehavior(behavoir);
-    }
+        public void EnterAttacking()
+        {
+            _animator.SetBool(_isAttack, true);
+        }
+        public void UpdateAttacking()
+        {
 
-    public void SetBehaviorActive()
-    {
-        var behavoir = GetBehavior<PlayerBehaviorActive>();
-        SetBehavior(behavoir);
-    }
+        }
+        public void ExitAttacking()
+        {
+            _animator.SetBool(_isAttack, false);
+        }
 
-    public void SetBehaviorAggressive()
-    {
-        var behavoir = GetBehavior<PlayerBehaviorAggressive>();
-        SetBehavior(behavoir);
+        public void EnterMoving()
+        {
+            _animator.SetBool(_isIdle, false);
+            _animator.SetBool(_isMove, true);
+        }
+        public void UpdateMoving()
+        {
+            _rigidbody.linearVelocity = MoveVector * _speed * ISimulationSystem.CurrentSpeed;
+            if (_rigidbody.linearVelocity.x > 0) GetComponent<SpriteRenderer>().flipX = false;
+            else GetComponent<SpriteRenderer>().flipX = true;
+        }
+        public void ExitMoving()
+        {
+            _rigidbody.linearVelocity = new Vector2(0, 0);
+        }
+
+
+        public bool IsIdle()
+        {
+            return _animator.GetBool(_isIdle) == true;
+        }
+        public bool IsMoving()
+        {
+            return _animator.GetBool(_isMove) == true;
+        }
+        public bool IsAttacking()
+        {
+            return _animator.GetBool(_isAttack) == true;
+        }
+
+
+        private void Awake()
+        {
+            _rigidbody = GetComponent<Rigidbody2D>();
+            _animator = GetComponent<Animator>();
+            InitBehaviors();
+            UpdateAnimatorSpeed();
+        }
+        private void FixedUpdate()
+        {
+            if (_behaviorCurrent != null && ISimulationSystem.IsPlayed)
+            {
+                _behaviorCurrent.Update();
+            }
+        }
+        private void InitBehaviors()
+        {
+            _behaviorMap = new();
+
+            _behaviorMap[typeof(PlayerBehaviorIdle)] = new PlayerBehaviorIdle(EnterIdle, ExitIdle, UpdateIdle);
+            _behaviorMap[typeof(PlayerBehaviorMoving)] = new PlayerBehaviorMoving(EnterMoving, ExitMoving, UpdateMoving);
+            _behaviorMap[typeof(PlayerBehaviorAttacking)] = new PlayerBehaviorAttacking(EnterAttacking, ExitAttacking, UpdateAttacking);
+
+            SetBehaviorByDefault();
+        }
+        private void SetBehavior(PlayerBehavior newBehavior)
+        {
+            if (_behaviorCurrent != null)
+            {
+                _behaviorCurrent.Exit();
+            }
+
+            _behaviorCurrent = newBehavior;
+            _behaviorCurrent.Enter();
+        }
+        private PlayerBehavior GetBehavior<T>() where T : PlayerBehavior
+        {
+            var type = typeof(T);
+            return _behaviorMap[type];
+        }
+
+
+        private PlayerBehavior _behaviorCurrent;
+        private Dictionary<Type, PlayerBehavior> _behaviorMap;
+
+        private Rigidbody2D _rigidbody;
+        private Animator _animator;
+        private const string IS_IDLE = "IsIdle";
+        private const string IS_MOVE = "IsMove";
+        private const string IS_ATTACK = "IsAttack";
+        private int _isIdle = Animator.StringToHash(IS_IDLE);
+        private int _isMove = Animator.StringToHash(IS_MOVE);
+        private int _isAttack = Animator.StringToHash(IS_ATTACK);
     }
 }

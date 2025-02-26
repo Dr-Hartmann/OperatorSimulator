@@ -93,11 +93,11 @@ public class Dialog : MonoBehaviour, IPointerClickHandler
     }
     private bool SetDialogDictionary()
     {
-        var dialog = GUISystem.Instance.GetDialog(Key);
+        var dialog = GUISystem.Instance?.GetDialog(Key);
         if (dialog == null)
         {
-            SimulationUtilities.DisplayWarning($"Dictionary is empty - {Key}");
-            dialog = new(GUISystem.Instance.GetDialog("null"));
+            GameUtilities.DisplayWarning($"Dictionary is empty - {Key}");
+            dialog = new(GUISystem.Instance?.GetDialog("null"));
             if (dialog == null) return false;
         }
         _dialogText = new(dialog);
@@ -105,14 +105,14 @@ public class Dialog : MonoBehaviour, IPointerClickHandler
     }
     private bool SetDialogList(ref List<string> list)
     {
-        if (!_dialogText.TryGetValue(SimulationUtilities.CurrentLanguage, out list))
+        if (!_dialogText.TryGetValue(GameUtilities.CurrentLanguage, out list))
         {
-            SimulationUtilities.DisplayWarning($"Language does not exist");
+            GameUtilities.DisplayWarning($"Language does not exist");
             return false;
         }
         if (list.Count <= 0)
         {
-            SimulationUtilities.DisplayWarning($"Language list is empty");
+            GameUtilities.DisplayWarning($"Language list is empty");
             return false;
         }
         return true;

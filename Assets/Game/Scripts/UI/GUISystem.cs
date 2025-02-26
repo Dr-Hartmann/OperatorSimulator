@@ -11,7 +11,6 @@ using System;
 /// <summary>
 /// Система локализации интерфейса.
 /// Организует чтение диалогов из .json-файла в класс <see cref="JSONDialog"/> и получение нужного набора по ключу.
-/// 
 /// </summary>
 public sealed partial class GUISystem : MonoBehaviour, IGUISystem
 {
@@ -28,14 +27,14 @@ public sealed partial class GUISystem : MonoBehaviour, IGUISystem
 
     private static int _tipsCounter = 0;
 
-    public void SetUI(LocalizationModes mode, string languageCode = SimulationUtilities.DEFAULT_LANGUAGE)
+    public void SetUI(LocalizationModes mode, string languageCode = GameUtilities.DEFAULT_LANGUAGE)
     {
         if (IsEmptyUIFiles()) return;
 
         if (!_uiFiles.TryGetValue(languageCode, out var value))
         {
-            SimulationUtilities.DisplayWarning("Language not found");
-            languageCode = SimulationUtilities.DEFAULT_LANGUAGE;
+            GameUtilities.DisplayWarning("Language not found");
+            languageCode = GameUtilities.DEFAULT_LANGUAGE;
         }
 
         if (!SetLanguage(mode, languageCode)) return;
@@ -48,7 +47,7 @@ public sealed partial class GUISystem : MonoBehaviour, IGUISystem
     {
         if (IsEmptyUIText()) return key;
         if (_uiText.TryGetValue(key, out string value)) return value;
-        SimulationUtilities.DisplayWarning($"Invalid key - {key}");
+        GameUtilities.DisplayWarning($"Invalid key - {key}");
         return key;
     }
     public bool ReadDialogJSON(string path)
@@ -58,7 +57,7 @@ public sealed partial class GUISystem : MonoBehaviour, IGUISystem
         _dialog = JsonConvert.DeserializeObject<JSONDialog>(json.text);
         if (_dialog.text.Count <= 0)
         {
-            SimulationUtilities.DisplayWarning("Path is empty");
+            GameUtilities.DisplayWarning("Path is empty");
             return false;
         }
         return true;
@@ -73,7 +72,7 @@ public sealed partial class GUISystem : MonoBehaviour, IGUISystem
     private void Awake()
     {
         if (!SetInstance()) return;
-        SetFrameRate(_targetFrameRate, 0);
+        SetFrameRate(ref _targetFrameRate, 0);
 
         if (!GetUIFiles()) return;
         string currentCulture = CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
@@ -98,7 +97,7 @@ public sealed partial class GUISystem : MonoBehaviour, IGUISystem
     {
         OnDisable();
     }
-    private void SetFrameRate(int frameRate, int vSyncCount)
+    private void SetFrameRate(ref int frameRate, int vSyncCount)
     {
         QualitySettings.vSyncCount = vSyncCount;
         Application.targetFrameRate = frameRate;
@@ -135,24 +134,24 @@ public partial class GUISystem
         {
             case LocalizationModes.SWITCH_NEXT:
                 List<string> list = _uiFiles.Values.ToList();
-                int currentIndex = list.IndexOf(_uiFiles.GetValueOrDefault(SimulationUtilities.CurrentLanguage));
+                int currentIndex = list.IndexOf(_uiFiles.GetValueOrDefault(GameUtilities.CurrentLanguage));
                 int nextIndex = (currentIndex + 1) % _uiFiles.Count;
-                SimulationUtilities.CurrentLanguage = _uiFiles.ElementAt(nextIndex).Key;
+                GameUtilities.CurrentLanguage = _uiFiles.ElementAt(nextIndex).Key;
                 break;
 
             case LocalizationModes.SET:
-                SimulationUtilities.CurrentLanguage = languageCode;
+                GameUtilities.CurrentLanguage = languageCode;
                 break;
 
             default:
-                SimulationUtilities.DisplayWarning($"Invalid mode - {mode}");
+                GameUtilities.DisplayWarning($"Invalid mode - {mode}");
                 break;
         }        
         return true;
     }
     private void SetPlayerPrefs()
     {
-        PlayerPrefs.SetString("language", SimulationUtilities.CurrentLanguage);
+        PlayerPrefs.SetString("language", GameUtilities.CurrentLanguage);
         PlayerPrefs.Save();
     }
 }
@@ -194,7 +193,7 @@ public partial class GUISystem
     private bool ReadUIFile()
     {
         _uiText = new Dictionary<string, string>();
-        string[] lines = File.ReadAllText(_uiFiles[SimulationUtilities.CurrentLanguage]).Split(_uiEndLine);
+        string[] lines = File.ReadAllText(_uiFiles[GameUtilities.CurrentLanguage]).Split(_uiEndLine);
         foreach (string item in lines)
         {
             if (!string.IsNullOrWhiteSpace(item))
@@ -205,7 +204,7 @@ public partial class GUISystem
                     _uiText[keyValue[0].Trim()] = keyValue[1].Trim();
                     continue;
                 }
-                SimulationUtilities.DisplayWarning($"Invalid line - {item}");
+                GameUtilities.DisplayWarning($"Invalid line - {item}");
             }
         }
 
@@ -229,7 +228,7 @@ public partial class GUISystem
     {
         if (_uiFiles == null || _uiFiles.Count <= 0)
         {
-            SimulationUtilities.DisplayWarning($"Localization files do not exist");
+            GameUtilities.DisplayWarning($"Localization files do not exist");
             return true;
         }
         return false;
@@ -238,7 +237,7 @@ public partial class GUISystem
     {
         if (_uiText == null || _uiText.Count <= 0)
         {
-            SimulationUtilities.DisplayWarning($"There is no text");
+            GameUtilities.DisplayWarning($"There is no text");
             return true;
         }
         return false;

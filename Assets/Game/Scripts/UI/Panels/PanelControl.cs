@@ -1,8 +1,9 @@
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using SimulationCore;
 
+[RequireComponent(typeof(Image))]
 public class PanelControl : MonoBehaviour
 {
     [Header("Buttons")]
@@ -18,34 +19,11 @@ public class PanelControl : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _speedValue;
 
     private Image _playPauseImage;
-    private bool _isSubscribed = false;
 
 
-    private void Awake()
+    private void FixedUpdate()
     {
-        _playPauseImage = _playPause.GetComponent<Image>();
-    }
-    private void Update()
-    {
-        _speedValue.SetText(SimulationSystem.CurrentSpeed.ToString());
-    }   
-    private void Start()
-    {
-        SubscribeAll();
-        _isSubscribed = true;
-    }
-    private void OnEnable()
-    {
-        if(!_isSubscribed) SubscribeAll();
-    }
-    private void OnDisable()
-    {
-        UnsubscribeAll();
-        _isSubscribed = false;
-    }
-    private void OnDestroy()
-    {
-        OnDisable();
+        _speedValue.SetText(ISimulationSystem.CurrentSpeed.ToString());
     }
     private void ChangeSprite(bool _isPlayed)
     {
@@ -54,26 +32,43 @@ public class PanelControl : MonoBehaviour
     }
     private void OnClickPlayPause()
     {
-        SimulationSystem.Instance?.ReversePlayPause();
+        ISimulationSystem.ReversePlayPause();
     }
     private void OnClickLess()
     {
-        SimulationSystem.Instance?.SetSpeed(SimulationSpeedStates.Decrease);
+        ISimulationSystem.SetSpeed(SimulationSpeedStates.Decrease);
     }
     private void OnClickMore()
     {
-        SimulationSystem.Instance?.SetSpeed(SimulationSpeedStates.Increase);
+        ISimulationSystem.SetSpeed(SimulationSpeedStates.Increase);
+    }
+    private void Awake()
+    {
+        _playPauseImage = _playPause.GetComponent<Image>();
+    }
+    private void OnEnable()
+    {
+        SubscribeAll();
+    }
+    private void OnDisable()
+    {
+        UnsubscribeAll();
+    }
+    private void OnDestroy()
+    {
+        OnDisable();
     }
     private void SubscribeAll()
     {
-        SimulationSystem.Played += ChangeSprite;
+        UnsubscribeAll();
+        ISimulationSystem.Played += ChangeSprite;
         _less.onClick.AddListener(OnClickLess);
         _more.onClick.AddListener(OnClickMore);
         _playPause.onClick.AddListener(OnClickPlayPause);
     }
     private void UnsubscribeAll()
     {
-        SimulationSystem.Played -= ChangeSprite;
+        ISimulationSystem.Played -= ChangeSprite;
         _less.onClick.RemoveAllListeners();
         _more.onClick.RemoveAllListeners();
         _playPause.onClick.RemoveAllListeners();
