@@ -2,7 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using SimulationCore;
+using Simulation;
 
 // TODO - сделать курву для нелиненой зависимости открытости клапана
 
@@ -135,12 +135,12 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     private void SubscribeAll()
     {
         UnsubscribeAll();
-        ISimulationSystem.TickPassed += UpdateValve;
+        SimulationSystem.EventTickPassed += UpdateValve;
         _thisButton.onClick.AddListener(OnClick);
     }
     private void UnsubscribeAll()
     {
-        ISimulationSystem.TickPassed -= UpdateValve;
+        SimulationSystem.EventTickPassed -= UpdateValve;
         _thisButton.onClick.RemoveAllListeners();
     }
 

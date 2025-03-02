@@ -1,22 +1,38 @@
 using UnityEngine;
 using PlayerSpace;
-using SimulationCore;
+using Simulation;
 using System.Threading.Tasks;
 
-[RequireComponent(typeof(Player))]
 public class InputSystemController : MonoBehaviour
 {
     [SerializeField] private GameObject _prefabDialog;
+    [SerializeField] private Player _player;
+    [SerializeField] private RectTransform _canvas;
 
     private InputSystem_Actions _inputActions;
     private InputSystem_Actions.UIActions _uiAct;
     private InputSystem_Actions.PlayerActions _playerAct;
 
-    private Player player;
-    private RectTransform _canvas;
+
+    
     private bool _canCancel = true;
 
+    private bool _move = false;
+    private bool _attack = false;
+    private bool _isChanged = false;
 
+    private void Update()
+    {
+        if (!_isChanged) return;
+
+        if (_attack) _player.SetBehaviorAttacking();
+        else if (_move) _player.SetBehaviorMoving();
+        else _player.SetBehaviorIdle();
+
+        _isChanged = false;
+    }
+
+    // для аниматора
     public void SetCanCancel()
     {
         _canCancel = true;
@@ -25,6 +41,7 @@ public class InputSystemController : MonoBehaviour
     {
         _canCancel = false;
     }
+    //
 
 
     public void SubscribeAll()
@@ -61,7 +78,6 @@ public class InputSystemController : MonoBehaviour
         _playerAct.Move.canceled += context => MoveCanceled();
 
         _playerAct.Attack.started += context => AttackStarted();
-        //_playerAct.Attack.performed += context => AttackPerformed();
         _playerAct.Attack.canceled += context => AttackCanceled();
     }
     public void UnsubscribePlayer()
@@ -73,15 +89,12 @@ public class InputSystemController : MonoBehaviour
         _playerAct.Move.canceled -= context => MoveCanceled();
 
         _playerAct.Attack.started -= context => AttackStarted();
-        //_playerAct.Attack.performed -= context => AttackPerformed();
         _playerAct.Attack.canceled -= context => AttackCanceled();
     }
 
 
     private void Awake()
     {
-        _canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<RectTransform>();
-        player = GetComponent<Player>();
         _inputActions = new();
         _uiAct = _inputActions.UI;
         _playerAct = _inputActions.Player;
@@ -96,11 +109,11 @@ public class InputSystemController : MonoBehaviour
         _uiAct.Disable();
         _playerAct.Disable();
     }
-    private async Task Delay()
-    {
-        await Task.Run(() => { while (!_canCancel) { }; return; });
-    }
 
+    private async Task DelayCancel()
+    {
+        await Task.Run(() => { while (!_canCancel) { }; });
+    }
 
     private void StartDialog()
     {
@@ -111,62 +124,50 @@ public class InputSystemController : MonoBehaviour
         txt.StartDialog("test");
     }
 
-    private async void MoveStarted()
+    private void MoveStarted()
     {
-        await Delay();
-        //Debug.Log("MoveStart");
-        player.SetBehaviorMoving();
+        _move = true;
+        _isChanged = true;
     }
-    private async void MovePerformed(Vector2 vector)
+    private void MovePerformed(Vector2 vector)
     {
-        await Delay();
-        //Debug.Log("MovePerf");
-        if (player.IsMoving()) player.MoveVector = vector;
-        else MoveCanceled();
+        _player.MoveVector = vector;
     }
-    private async void MoveCanceled()
+    private void MoveCanceled()
     {
-        await Delay();
-        Debug.Log("MoveCancel");
-        player.SetBehaviorByDefault();
+        _move = false;
+        _isChanged = true;
     }
+
     private void AttackStarted()
     {
-        Debug.Log("AttackStart");
-        player.SetBehaviorAttacking();
-        SetCannotCancel();
+        _attack = true;
+        _isChanged = true;
     }
-    //private void AttackPerformed()
-    //{
-    //    //Debug.Log("AttackPerf");
-    //}
     private async void AttackCanceled()
     {
-        await Delay();
-        Debug.Log("AttackCancel");
-        if (player.IsIdle()) player.SetBehaviorIdle();
-        else if (player.IsMoving()) player.SetBehaviorMoving();
-        else player.SetBehaviorByDefault();
-        SetCanCancel();
+        await DelayCancel();
+        _attack = false;
+        _isChanged = true;
     }
 
     private void PlayPause()
     {
-        ISimulationSystem.ReversePlayPause();
-        player.UpdateAnimatorSpeed();
+        SimulationSystem.Instance.ReversePlayPause();
+        _player.UpdateAnimatorSpeed();
     }
     private void SpeedMore()
     {
-        ISimulationSystem.SetSpeed(SimulationSpeedStates.Increase);
-        player.UpdateAnimatorSpeed();
+        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Increase);
+        _player.UpdateAnimatorSpeed();
     }
     private void SpeedLess()
     {
-        ISimulationSystem.SetSpeed(SimulationSpeedStates.Decrease);
-        player.UpdateAnimatorSpeed();
+        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Decrease);
+        _player.UpdateAnimatorSpeed();
     }
     private void Restart()
     {
-        ISimulationSystem.SetState(SimulationStates.Stop);
+        SimulationSystem.Instance.SetState(SimulationStates.Stop);
     }
 }

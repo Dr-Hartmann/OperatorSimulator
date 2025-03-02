@@ -1,16 +1,16 @@
 using UnityEngine;
-using SimulationCore;
+using Simulation;
 
 public class PanelStop : MonoBehaviour
 {
     private void OnEnable()
     {
-        ISimulationSystem.Played -= SetActive;
-        ISimulationSystem.Played += SetActive;
+        SimulationSystem.EventPlayed -= SetActive;
+        SimulationSystem.EventPlayed += SetActive;
     }
     private void OnDestroy()
     {
-        ISimulationSystem.Played -= SetActive;
+        SimulationSystem.EventPlayed -= SetActive;
     }
     private void SetActive(bool _isPlayed)
     {

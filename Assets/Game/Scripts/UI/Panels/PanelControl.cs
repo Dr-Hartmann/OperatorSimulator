@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using SimulationCore;
+using Simulation;
 
 [RequireComponent(typeof(Image))]
 public class PanelControl : MonoBehaviour
@@ -23,7 +23,7 @@ public class PanelControl : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _speedValue.SetText(ISimulationSystem.CurrentSpeed.ToString());
+        _speedValue.SetText(SimulationSystem.Instance.CurrentSpeed.ToString());
     }
     private void ChangeSprite(bool _isPlayed)
     {
@@ -32,15 +32,15 @@ public class PanelControl : MonoBehaviour
     }
     private void OnClickPlayPause()
     {
-        ISimulationSystem.ReversePlayPause();
+        SimulationSystem.Instance.ReversePlayPause();
     }
     private void OnClickLess()
     {
-        ISimulationSystem.SetSpeed(SimulationSpeedStates.Decrease);
+        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Decrease);
     }
     private void OnClickMore()
     {
-        ISimulationSystem.SetSpeed(SimulationSpeedStates.Increase);
+        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Increase);
     }
     private void Awake()
     {
@@ -61,14 +61,14 @@ public class PanelControl : MonoBehaviour
     private void SubscribeAll()
     {
         UnsubscribeAll();
-        ISimulationSystem.Played += ChangeSprite;
+        SimulationSystem.EventPlayed += ChangeSprite;
         _less.onClick.AddListener(OnClickLess);
         _more.onClick.AddListener(OnClickMore);
         _playPause.onClick.AddListener(OnClickPlayPause);
     }
     private void UnsubscribeAll()
     {
-        ISimulationSystem.Played -= ChangeSprite;
+        SimulationSystem.EventPlayed -= ChangeSprite;
         _less.onClick.RemoveAllListeners();
         _more.onClick.RemoveAllListeners();
         _playPause.onClick.RemoveAllListeners();
