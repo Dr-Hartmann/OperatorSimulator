@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using SimulationCore;
 
 // TODO - сделать переменнуя частоту кадров, файл 'settings.ini'?
 // TODO - сделать раздел "настройки"
@@ -9,68 +8,49 @@ using SimulationCore;
 
 namespace Simulation
 {
-    public class SimulationSystem : MonoBehaviour/*, ISimulationSystem*/
+    /// <summary>
+    /// Контролирует состояние симуляции  и сообщает её скорость.
+    /// </summary>
+    public class SimulationSystem : MonoBehaviour
     {
-        [Header("Simulation settings")]
-        [SerializeField] private SimulationStates _simulationState = SimulationStates.Pause;
-        [SerializeField] private float _maxSpeed = 10f;
-        [SerializeField] private float _minSpeed = -4f;
-        [SerializeField] private float _speedStep = .25f;
+        [SerializeField] SimulationSettings _simulationSettings;
 
-        public static SimulationSystem Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = GameObject.FindAnyObjectByType<SimulationSystem>();
-                    if (_instance != null)
-                        DontDestroyOnLoad(_instance.gameObject);
-                }
-                return _instance;
-            }
-        }
+        private Action<float> TickPassed;
+        private Action<bool> Played;
 
-        public static Action<float> EventTickPassed
+        public static void SubEventTickPassed(Action<float> action)
         {
-            get => Instance?.TickPassed;
-            set
-            {
-                if (Instance)
-                {
-                    Instance.TickPassed += value;
-                }
-            }
+            Instance.TickPassed += action;
         }
-        public static Action<bool> EventPlayed
+        public static void UnsubEventTickPassed(Action<float> action)
         {
-            get => Instance?.Played;
-            set
-            {
-                if (Instance)
-                {
-                    Instance.Played += value;
-                }
-            }
+            if (_instance) _instance.TickPassed -= action;
         }
-
-        public float CurrentSpeed { get; private set; } = 1f;
-        public bool IsPlayed => _simulationState == SimulationStates.Play;
-        public bool IsPaused => _simulationState == SimulationStates.Pause;
-        public bool IsStopped => _simulationState == SimulationStates.Stop;
-        public void SetState(SimulationStates state)
+        public static void SubEventEventPlayed(Action<bool> action)
+        {
+            Instance.Played += action;
+        }
+        public static void UnsubEventPlayed(Action<bool> action)
+        {
+            if (_instance) _instance.Played -= action;
+        }
+        public static float CurrentSpeed { get; private set; } = 1f;
+        public static bool IsPlayed => _simulationState == SimulationStates.Play;
+        public static bool IsPaused => _simulationState == SimulationStates.Pause;
+        public static bool IsStopped => _simulationState == SimulationStates.Stop;
+        public static void SetState(SimulationStates state)
         {
             switch (state)
             {
                 case SimulationStates.Play:
                     //Time.timeScale = 1;
-                    EventPlayed?.Invoke(true);
+                    Instance.Played?.Invoke(true);
 
                     break;
 
                 case SimulationStates.Pause:
                     //Time.timeScale = 0;
-                    EventPlayed?.Invoke(false);
+                    Instance.Played?.Invoke(false);
 
                     break;
 
@@ -79,17 +59,15 @@ namespace Simulation
                     break;
 
                 default:
-                    GameUtilities.DisplayWarning("Unknown state");
+                    GameUtilities.Debug.GameUtilities.DisplayWarning("Unknown state");
                     _simulationState = SimulationStates.Pause;
-                    EventPlayed?.Invoke(false);
+                    Instance.Played?.Invoke(false);
                     return;
             }
             _simulationState = state;
         }
-        /// <summary>
-        /// speed - абсолютный плоказатель скорости или множитель при инкременте и дикременте
-        /// </summary>
-        public void SetSpeed(SimulationSpeedStates state, float speed = 1)
+        /// <summary>speed - абсолютный плоказатель скорости или множитель при инкременте и декременте.</summary>
+        public static void SetSpeed(SimulationSpeedStates state, float speed = 1)
         {
             {
                 switch (state)
@@ -107,14 +85,14 @@ namespace Simulation
                         break;
 
                     default:
-                        GameUtilities.DisplayWarning("Unknown state");
+                        GameUtilities.Debug.GameUtilities.DisplayWarning("Unknown state");
                         break;
                 }
                 if (CurrentSpeed > _maxSpeed) CurrentSpeed = _maxSpeed;
                 else if (CurrentSpeed < _minSpeed) CurrentSpeed = _minSpeed;
             }
         }
-        public void ReversePlayPause()
+        public static void ReversePlayPause()
         {
             if (IsPlayed) SetState(SimulationStates.Pause);
             else SetState(SimulationStates.Play);
@@ -123,15 +101,11 @@ namespace Simulation
 
         private void Awake()
         {
-            if (_instance == null)
-            {
-                _instance = this;
-                DontDestroyOnLoad(this.gameObject);
-            }
-            else if (this != (UnityEngine.Object)_instance)
-            {
-                Destroy(this.gameObject);
-            }
+            if (!_simulationSettings) return;
+            _simulationState = _simulationSettings.SimulationStartState;
+            _maxSpeed = _simulationSettings.SimulationMaxSpeed;
+            _minSpeed = _simulationSettings.SimulationMinSpeed;
+            _speedStep = _simulationSettings.SimulationSpeedStep;
         }
         private void Start()
         {
@@ -141,7 +115,7 @@ namespace Simulation
         {
             if (IsPlayed)
             {
-                EventTickPassed?.Invoke(Time.deltaTime * CurrentSpeed);
+                TickPassed?.Invoke(Time.deltaTime * CurrentSpeed);
             }
             else if (IsPaused)
             {
@@ -152,18 +126,34 @@ namespace Simulation
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
-        private void OnDestroy()
+        
+        private static SimulationSystem Instance
         {
-            EventPlayed = null;
-            EventTickPassed = null;
+            get
+            {
+                if (!_instance)
+                {
+                    _instance = GameObject.FindAnyObjectByType<SimulationSystem>();
+                    if (!_instance) return null;
+                    DontDestroyOnLoad(_instance.gameObject);
+                }
+                return _instance;
+            }
         }
-        private Action<float> TickPassed { get; set; }
-        private Action<bool> Played { get; set; }
         private static SimulationSystem _instance;
+        private static SimulationStates _simulationState;
+        private static float _maxSpeed;
+        private static float _minSpeed;
+        private static float _speedStep;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void InitializeOnLoadMethod()
         {
             _instance = null;
+            _simulationState = SimulationStates.Play;
+            _maxSpeed = 0;
+            _minSpeed = 0;
+            _speedStep = 0;
         }
     }
 }

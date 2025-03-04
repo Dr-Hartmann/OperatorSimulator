@@ -1,47 +1,45 @@
 using UnityEngine;
 using PlayerSpace;
 using Simulation;
-using System.Threading.Tasks;
 
 public class InputSystemController : MonoBehaviour
 {
-    [SerializeField] private GameObject _prefabDialog;
     [SerializeField] private Player _player;
-    [SerializeField] private RectTransform _canvas;
+    
 
     private InputSystem_Actions _inputActions;
     private InputSystem_Actions.UIActions _uiAct;
     private InputSystem_Actions.PlayerActions _playerAct;
-
-
     
-    private bool _canCancel = true;
 
+    //private bool _canCancel = true;
+    private bool _isChanged = false;
     private bool _move = false;
     private bool _attack = false;
-    private bool _isChanged = false;
+    
 
-    private void Update()
+    private /*async*/ void Update()
     {
         if (!_isChanged) return;
+        //await Task.Run(() => { while (!_canCancel) { }; });
 
         if (_attack) _player.SetBehaviorAttacking();
         else if (_move) _player.SetBehaviorMoving();
         else _player.SetBehaviorIdle();
-
+            
         _isChanged = false;
     }
 
     // для аниматора
     public void SetCanCancel()
     {
-        _canCancel = true;
+        //_canCancel = true;
     }
     public void SetCannotCancel()
     {
-        _canCancel = false;
+        //_canCancel = false;
     }
-    //
+    // /для аниматора
 
 
     public void SubscribeAll()
@@ -98,7 +96,9 @@ public class InputSystemController : MonoBehaviour
         _inputActions = new();
         _uiAct = _inputActions.UI;
         _playerAct = _inputActions.Player;
-
+    }
+    private void OnEnable()
+    {
         SubscribeAll();
         _uiAct.Enable();
         _playerAct.Enable();
@@ -110,18 +110,9 @@ public class InputSystemController : MonoBehaviour
         _playerAct.Disable();
     }
 
-    private async Task DelayCancel()
-    {
-        await Task.Run(() => { while (!_canCancel) { }; });
-    }
-
     private void StartDialog()
     {
-        if (GameObject.FindGameObjectWithTag(_prefabDialog.tag)) return;
-        GameObject obj = Instantiate(_prefabDialog, _canvas);
-        Dialog txt = obj.GetComponentInChildren<Dialog>();
-        txt.Path = "Dialog/greeting";
-        txt.StartDialog("test");
+        
     }
 
     private void MoveStarted()
@@ -144,30 +135,29 @@ public class InputSystemController : MonoBehaviour
         _attack = true;
         _isChanged = true;
     }
-    private async void AttackCanceled()
+    private void AttackCanceled()
     {
-        await DelayCancel();
         _attack = false;
         _isChanged = true;
     }
 
     private void PlayPause()
     {
-        SimulationSystem.Instance.ReversePlayPause();
+        SimulationSystem.ReversePlayPause();
         _player.UpdateAnimatorSpeed();
     }
     private void SpeedMore()
     {
-        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Increase);
+        SimulationSystem.SetSpeed(SimulationSpeedStates.Increase);
         _player.UpdateAnimatorSpeed();
     }
     private void SpeedLess()
     {
-        SimulationSystem.Instance.SetSpeed(SimulationSpeedStates.Decrease);
+        SimulationSystem.SetSpeed(SimulationSpeedStates.Decrease);
         _player.UpdateAnimatorSpeed();
     }
     private void Restart()
     {
-        SimulationSystem.Instance.SetState(SimulationStates.Stop);
+        SimulationSystem.SetState(SimulationStates.Stop);
     }
 }

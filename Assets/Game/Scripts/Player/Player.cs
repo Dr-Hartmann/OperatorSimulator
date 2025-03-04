@@ -35,7 +35,7 @@ namespace PlayerSpace
         }
         public void UpdateAnimatorSpeed()
         {
-            float newSpeed = 1 * SimulationSystem.Instance.CurrentSpeed;
+            float newSpeed = 1 * SimulationSystem.CurrentSpeed;
             if (newSpeed > 0) _animator.speed = newSpeed;
             else _animator.speed = -newSpeed;
         }
@@ -74,7 +74,7 @@ namespace PlayerSpace
         }
         public void UpdateMoving()
         {
-            _rigidbody.linearVelocity = MoveVector * _speed * SimulationSystem.Instance.CurrentSpeed;
+            _rigidbody.linearVelocity = MoveVector * _speed * SimulationSystem.CurrentSpeed;
             if (_rigidbody.linearVelocity.x > 0) _spriteRenderer.flipX = false;
             else _spriteRenderer.flipX = true;
         }
@@ -108,7 +108,7 @@ namespace PlayerSpace
         }
         private void FixedUpdate()
         {
-            if (_behaviorCurrent != null && SimulationSystem.Instance.IsPlayed)
+            if (_behaviorCurrent != null && SimulationSystem.IsPlayed)
             {
                 _behaviorCurrent.Update();
             }

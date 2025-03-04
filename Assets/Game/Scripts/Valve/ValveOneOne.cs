@@ -6,29 +6,26 @@ using Simulation;
 
 // TODO - сделать курву для нелиненой зависимости открытости клапана
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Image))]
 [RequireComponent(typeof(Button))]
 public sealed class ValveOneOne : MonoBehaviour, IValve
 {
-    [Header("Valve sprites")]
-    [SerializeField] private Sprite _spriteNeutral;
-    [SerializeField] private Sprite _spriteClose;
-    [SerializeField] private Sprite _spriteAverage;
-    [SerializeField] private Sprite _spriteOpen;
+    [SerializeField] private ValveOneOneSettings _valveSettings;
 
-    [Header("Valve sensors")]
+    [Header("Valve sensor")]
     [Range(MIN_VALUE_OPENNES, MAX_VALUE_OPENNES)]
     [SerializeField] private float _openingPercentage = MIN_VALUE_OPENNES;
+    [SerializeField] private TextMeshProUGUI _openingSensorText;
 
-    [Header("Valve settings")]
-    [SerializeField] public ValveStates _currentValveState = ValveStates.Close;
-    [SerializeField] private float _openingSpeed = 1f;
-    [SerializeField] private float _closingSpeed = .8f;
-    [SerializeField] private float _multiplierSoonToEndState = 5f;
-
-    private SpriteRenderer _thisImage;
+    private Image _thisImage;
     private Button _thisButton;
-    private TextMeshProUGUI _openingSensorText;
+
+    private ValveStates _currentValveState;
+    private float _openingSpeed, _closingSpeed, _multiplierSoonToEndState;
+    private Sprite _spriteNeutral;
+    private Sprite _spriteClose;
+    private Sprite _spriteAverage;
+    private Sprite _spriteOpen;
 
 
     public float OpenPercent
@@ -60,16 +57,23 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
         else if (IsClose || IsClosing) ChangeStateAndSprite(ValveStates.Opening, _spriteAverage);
         else
         {
-            GameUtilities.DisplayWarning($"Valve is in an unknown state");
+            GameUtilities.Debug.GameUtilities.DisplayWarning($"Valve is in an unknown state");
             return;
         }
     }
     private void Awake()
     {
         _thisButton = GetComponent<Button>();
-        _thisImage = GetComponent<SpriteRenderer>();
-        _openingSensorText = GetComponentInChildren<RectTransform>()
-            .GetComponentInChildren<TextMeshProUGUI>();
+        _thisImage = GetComponent<Image>();
+
+        _currentValveState = _valveSettings.StartValveState;
+        _openingSpeed = _valveSettings.OpeningSpeed;
+        _closingSpeed = _valveSettings.ClosingSpeed;
+        _multiplierSoonToEndState = _valveSettings.MultiplierSoonToEndState;
+        _spriteNeutral = _valveSettings.SpriteNeutral;
+        _spriteClose = _valveSettings.SpriteClose;
+        _spriteAverage = _valveSettings.SpriteAverage;
+        _spriteOpen = _valveSettings.SpriteOpen;
 
         if (IsClose) Close();
         else if (IsOpen) Open();
@@ -135,12 +139,12 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     private void SubscribeAll()
     {
         UnsubscribeAll();
-        SimulationSystem.EventTickPassed += UpdateValve;
+        SimulationSystem.SubEventTickPassed(UpdateValve);
         _thisButton.onClick.AddListener(OnClick);
     }
     private void UnsubscribeAll()
     {
-        SimulationSystem.EventTickPassed -= UpdateValve;
+        SimulationSystem.UnsubEventTickPassed(UpdateValve);
         _thisButton.onClick.RemoveAllListeners();
     }
 

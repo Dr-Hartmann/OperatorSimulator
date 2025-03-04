@@ -1,15 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UserInterface;
 
 [RequireComponent(typeof(Button))]
 public class LocalizationButton : MonoBehaviour
 {
     private Button _thisButton;
-
-    public void OnClick()
-    {
-        GUISystem.Instance?.SetUI(LocalizationModes.SWITCH_NEXT);
-    }
 
     private void Awake()
     {
@@ -26,5 +22,9 @@ public class LocalizationButton : MonoBehaviour
     private void OnDestroy()
     {
         OnDisable();
+    }
+    private void OnClick()
+    {
+        UISystem.SetUI(LocalizationModes.SWITCH_NEXT);
     }
 }
