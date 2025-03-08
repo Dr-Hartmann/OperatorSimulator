@@ -59,10 +59,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9eed0642b09c9e24e9276be01a2bc2d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MAX_WIDTH: 1700
-  _minHeight: 200
-  _maxHeight: 700
-  _additionalHeight: 50
+  _childText: {fileID: 6569902577516178790}
 --- !u!114 &3776155024954541557
 MonoBehaviour:
   m_ObjectHideFlags: 0

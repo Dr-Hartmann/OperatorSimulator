@@ -25,6 +25,6 @@ public class LocalizationButton : MonoBehaviour
     }
     private void OnClick()
     {
-        UISystem.SetUI(LocalizationModes.SWITCH_NEXT);
+        UISystem.UpdateLanguageUI(LocalizationModes.SWITCH_NEXT);
     }
 }

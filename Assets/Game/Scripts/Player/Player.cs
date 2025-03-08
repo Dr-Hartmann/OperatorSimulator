@@ -6,17 +6,18 @@ using PlayerBehaviors;
 
 namespace PlayerSpace
 {
-    [RequireComponent(typeof(SpriteRenderer))]
     [RequireComponent(typeof(Rigidbody2D))]
     public class Player : MonoBehaviour
     {
-        [SerializeField] private float _speed = 8f;
+        /*[SerializeField] */private SpriteRenderer _spriteRenderer;
+        /*[SerializeField] */private Animator _animator;
+        [SerializeField] private Rigidbody2D _rigidbody;
 
-        private SpriteRenderer _spriteRenderer;
-        private Rigidbody2D _rigidbody;
-        private Animator _animator;
-        public Vector2 MoveVector { get; set; }
+        private const string IS_IDLE = "IsIdle";
+        private const string IS_MOVE = "IsMove";
+        private const string IS_ATTACK = "IsAttack";
 
+        #region PUBLIC
         public void SetBehaviorIdle()
         {
             SetBehavior(GetBehavior<PlayerBehaviorIdle>());
@@ -33,57 +34,11 @@ namespace PlayerSpace
         {
             SetBehaviorIdle();
         }
-        public void UpdateAnimatorSpeed()
+        public void UpdateAnimatorSpeed(float multiplier = 1)
         {
-            float newSpeed = 1 * SimulationSystem.CurrentSpeed;
-            if (newSpeed > 0) _animator.speed = newSpeed;
-            else _animator.speed = -newSpeed;
+            float newSpeed = SimulationSystem.CurrentSpeed * (SimulationSystem.IsPlayed ? 1f : 0f) * multiplier;
+            _animator.speed = Mathf.Abs(newSpeed);
         }
-
-        public void EnterIdle()
-        {
-            _animator.SetBool(_isIdle, true);
-            _animator.SetBool(_isMove, false);
-        }
-        public void UpdateIdle()
-        {
-
-        }
-        public void ExitIdle()
-        {
-
-        }
-
-        public void EnterAttacking()
-        {
-            _animator.SetBool(_isAttack, true);
-        }
-        public void UpdateAttacking()
-        {
-
-        }
-        public void ExitAttacking()
-        {
-            _animator.SetBool(_isAttack, false);
-        }
-
-        public void EnterMoving()
-        {
-            _animator.SetBool(_isIdle, false);
-            _animator.SetBool(_isMove, true);
-        }
-        public void UpdateMoving()
-        {
-            _rigidbody.linearVelocity = MoveVector * _speed * SimulationSystem.CurrentSpeed;
-            if (_rigidbody.linearVelocity.x > 0) _spriteRenderer.flipX = false;
-            else _spriteRenderer.flipX = true;
-        }
-        public void ExitMoving()
-        {
-            _rigidbody.linearVelocity = new Vector2(0, 0);
-        }
-
-
         public bool IsIdle()
         {
             return _animator.GetBool(_isIdle);
@@ -96,14 +51,21 @@ namespace PlayerSpace
         {
             return _animator.GetBool(_isAttack);
         }
+        #endregion
 
-
-        private void Awake()
+        #region CORE
+        public void Init(float baseSpeed)
         {
+            Speed = baseSpeed;
             _spriteRenderer = GetComponent<SpriteRenderer>();
-            _rigidbody = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
-            InitBehaviors();
+
+            _behaviorMap = new();
+            _behaviorMap[typeof(PlayerBehaviorIdle)] = new PlayerBehaviorIdle(EnterIdle, ExitIdle, UpdateIdle);
+            _behaviorMap[typeof(PlayerBehaviorMoving)] = new PlayerBehaviorMoving(EnterMoving, ExitMoving, UpdateMoving);
+            _behaviorMap[typeof(PlayerBehaviorAttacking)] = new PlayerBehaviorAttacking(EnterAttacking, ExitAttacking, UpdateAttacking);
+            SetBehaviorByDefault();
+
             UpdateAnimatorSpeed();
         }
         private void FixedUpdate()
@@ -113,42 +75,81 @@ namespace PlayerSpace
                 _behaviorCurrent.Update();
             }
         }
-        private void InitBehaviors()
+        #endregion
+
+        #region IDLE
+        public void EnterIdle()
         {
-            _behaviorMap = new();
-
-            _behaviorMap[typeof(PlayerBehaviorIdle)] = new PlayerBehaviorIdle(EnterIdle, ExitIdle, UpdateIdle);
-            _behaviorMap[typeof(PlayerBehaviorMoving)] = new PlayerBehaviorMoving(EnterMoving, ExitMoving, UpdateMoving);
-            _behaviorMap[typeof(PlayerBehaviorAttacking)] = new PlayerBehaviorAttacking(EnterAttacking, ExitAttacking, UpdateAttacking);
-
-            SetBehaviorIdle();
+            _animator.SetBool(_isIdle, true);
         }
+        public void UpdateIdle()
+        {
+
+        }
+        public void ExitIdle()
+        {
+            _animator.SetBool(_isIdle, false);
+        }
+        #endregion
+
+        #region ATTACK
+        public void EnterAttacking()
+        {
+            _animator.SetBool(_isAttack, true);
+        }
+        public void UpdateAttacking()
+        {
+
+        }
+        public void ExitAttacking()
+        {
+            _animator.SetBool(_isAttack, false);
+        }
+        #endregion
+
+        #region MOVE
+        public void EnterMoving()
+        {
+            _animator.SetBool(_isMove, true);
+        }
+        public void UpdateMoving()
+        {
+            _rigidbody.linearVelocity = MoveVector * Speed * SimulationSystem.CurrentSpeed;
+            if (_rigidbody.linearVelocity.x > 0) _spriteRenderer.flipX = false;
+            else _spriteRenderer.flipX = true;
+        }
+        public void ExitMoving()
+        {
+            _rigidbody.linearVelocity = new Vector2(0, 0);
+            _animator.SetBool(_isMove, false);
+        }
+        #endregion
+
+        #region BEHAVIOR
         private void SetBehavior(PlayerBehavior newBehavior)
         {
             if (_behaviorCurrent != null)
             {
                 _behaviorCurrent.Exit();
             }
-
             _behaviorCurrent = newBehavior;
             _behaviorCurrent.Enter();
         }
         private PlayerBehavior GetBehavior<T>() where T : PlayerBehavior
         {
-            var type = typeof(T);
-            return _behaviorMap[type];
+            return _behaviorMap[typeof(T)];
         }
+        #endregion
 
-
+        #region variables
         private PlayerBehavior _behaviorCurrent;
         private Dictionary<Type, PlayerBehavior> _behaviorMap;
+        public Vector2 MoveVector { get; set; }
+        private float Speed { get; set; }
 
-        
-        private const string IS_IDLE = "IsIdle";
-        private const string IS_MOVE = "IsMove";
-        private const string IS_ATTACK = "IsAttack";
         private int _isIdle = Animator.StringToHash(IS_IDLE);
         private int _isMove = Animator.StringToHash(IS_MOVE);
         private int _isAttack = Animator.StringToHash(IS_ATTACK);
+        #endregion
     }
 }

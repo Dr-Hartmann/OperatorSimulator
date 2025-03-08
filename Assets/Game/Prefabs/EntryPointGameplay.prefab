@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1582574344588606129
+--- !u!1 &433248770709696697
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,41 +8,47 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2451191845850685718}
-  - component: {fileID: 1649602052304841740}
+  - component: {fileID: 5938743609337990675}
+  - component: {fileID: 1261397356882037703}
   m_Layer: 0
-  m_Name: TipSystem
+  m_Name: EntryPointGameplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2451191845850685718
+--- !u!4 &5938743609337990675
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1582574344588606129}
+  m_GameObject: {fileID: 433248770709696697}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.8030097, y: 1.213804, z: -1.0569359}
+  m_LocalPosition: {x: 2.4595833, y: -1.1038536, z: -1.0041869}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1649602052304841740
+--- !u!114 &1261397356882037703
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1582574344588606129}
+  m_GameObject: {fileID: 433248770709696697}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af500e159b530d54c9072e129692fc92, type: 3}
+  m_Script: {fileID: 11500000, guid: c68b1492dd0b6834aa544d7f52df93a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _simulationSettings: {fileID: 11400000, guid: 31c5f53bf3fdcfb4fb6506e74da2d103, type: 2}
+  _gameSettings: {fileID: 11400000, guid: e1f143966c173824abe8c5551087000c, type: 2}
+  _uiSettings: {fileID: 11400000, guid: a1b4d2e6d587b81418457ca46ae96031, type: 2}
   _tipSettings: {fileID: 11400000, guid: 4229c395b4fef8c4a88e638378b0e85f, type: 2}
   _tipsPlace: {fileID: 0}
+  _dialogSettings: {fileID: 11400000, guid: 975fa86581c7bf4419a42cd7e77453ab, type: 2}
+  _placeForDialogues: {fileID: 0}
+  _playerSettings: {fileID: 11400000, guid: 345f0816381d23a4cabdd5bf12aeec53, type: 2}

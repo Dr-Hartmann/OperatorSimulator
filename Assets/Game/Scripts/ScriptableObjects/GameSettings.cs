@@ -7,12 +7,6 @@ public class GameSettings : ScriptableObject
     [SerializeField] private int _targetFrameRate = 30;
     [SerializeField] private int _vSyncCount = 0;
 
-    private void Awake()
-    {
-        GameSetFrameRate();
-    }
-
-    //TODO - задел на будущее
     public int GameTargetFrameRate
     {
         get => _targetFrameRate;
@@ -20,10 +14,5 @@ public class GameSettings : ScriptableObject
     public int GameVSyncCount
     {
         get => _vSyncCount;
-    }
-    public void GameSetFrameRate()
-    {
-        QualitySettings.vSyncCount = _vSyncCount;
-        Application.targetFrameRate = _targetFrameRate;
     }
 }

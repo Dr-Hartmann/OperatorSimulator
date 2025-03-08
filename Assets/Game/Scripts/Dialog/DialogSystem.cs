@@ -2,84 +2,75 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Dialogues.Dialogue;
+using UserInterface;
 
 namespace Dialogues.System
 {
     /// <summary>
-    /// Организует чтение диалогов из .json-файла в класс <see cref="JSONDialog"/>,
+    /// Организует чтение диалогов из .json-файла в класс <see cref="global::JSONDialog"/>,
     /// получение нужного набора по ключу и запуск диалога.
     /// </summary>
-    public class DialogSystem : MonoBehaviour
+    public static class DialogSystem
     {
-        [SerializeField] private DialogSettings _dialogSettings;
-        [SerializeField] private RectTransform _placeForDialogues;
-
-        private Dialog _dialogPrefab;
-        private JSONDialog _dialog;
-
-
-        public void StartDialog(string key, string path)
+        #region PUBLIC
+        public static void StartDialog(string key, string path)
         {
-            var find = GameObject.FindAnyObjectByType<Dialog>();
-            if (find)
-            {
-                find.StartDialog(key, path, _dialogSettings);
-                return;
-            }
-            GameObject obj = Instantiate(_dialogPrefab.gameObject, _placeForDialogues);
-            var txt = obj.GetComponent<Dialog>();
-            txt.StartDialog(key, path, _dialogSettings);
+            if (!ReadDialogJSON(path)) return;
+            FullDialog.StartDialog(key, MinHeight, MaxHeight, AdditionalHeight);
         }
-        public bool ReadDialogJSON(string path)
+        public static Dictionary<string, List<string>> GetDialog(string key)
         {
-            _dialog = new();
-            TextAsset json = Resources.Load(path) as TextAsset;
-            _dialog = JsonConvert.DeserializeObject<JSONDialog>(json.text);
-
-            if (_dialog.text.Count <= 0)
-            {
-                GameUtilities.Debug.GameUtilities.DisplayWarning("Path is empty");
-                json = Resources.Load(_dialogSettings.DefaultPath) as TextAsset;
-                _dialog = JsonConvert.DeserializeObject<JSONDialog>(json.text);
-                return false;
-            }
-
-            return true;
-        }
-        public Dictionary<string, List<string>> GetDialog(string key)
-        {
-            if (_dialog.text.TryGetValue(key, out var dialog)) return dialog;
+            CurrentLanguage = UISystem.CurrentLanguage;
+            if (JsonDialog.text.TryGetValue(key, out var dialog)) return dialog;
             GameUtilities.Debug.GameUtilities.DisplayWarning("Key is empty");
-            _dialog.text.TryGetValue(_dialogSettings.DefaultKey, out var dialogNull);
+            JsonDialog.text.TryGetValue(DefaultKey, out var dialogNull);
             return dialogNull;
         }
+        public static string CurrentLanguage { get; private set; }
+        #endregion
 
-        private void Awake()
+        #region CORE
+        public static void Init(Dialog fullDialogPrefab, RectTransform placeForDialogues, string defaultKey, string defaultPath, float minHeight, float maxHeight, float additionalHeight)
         {
-            if (!_dialogSettings) return;
-            _dialogPrefab = _dialogSettings.PrefabDialogFull;
+            DefaultKey = defaultKey;
+            PlaceForDialogues = placeForDialogues;
+            DefaultPath = defaultPath;
+            MinHeight = minHeight;
+            MaxHeight = maxHeight;
+            AdditionalHeight = additionalHeight;
+
+            JsonDialog = new();
+            GameObject obj = GameObject.Instantiate(fullDialogPrefab.gameObject, PlaceForDialogues);
+            FullDialog = obj.GetComponent<Dialog>();
+            FullDialog.gameObject.SetActive(false);
         }
+        #endregion
 
-
-        public static DialogSystem Instance
+        #region handlers
+        private static bool ReadDialogJSON(string path)
         {
-            get
-            {
-                if (!_instance)
-                {
-                    _instance = GameObject.FindAnyObjectByType<DialogSystem>();
-                    if (!_instance) return null;
-                    DontDestroyOnLoad(_instance.gameObject);
-                }
-                return _instance;
-            }
-        }
-        private static DialogSystem _instance;
+            TextAsset json = Resources.Load(path) as TextAsset;
+            JsonDialog = JsonConvert.DeserializeObject<JSONDialog>(json.text);
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeOnLoadMethod()
-        {
-            _instance = null;
+            if (JsonDialog.text.Count > 0) return true;
+
+            GameUtilities.Debug.GameUtilities.DisplayWarning("Path is empty");
+            json = Resources.Load(DefaultPath) as TextAsset;
+            JsonDialog = JsonConvert.DeserializeObject<JSONDialog>(json.text);
+            return false;
         }
+        #endregion
+
+        #region variables
+        private static JSONDialog JsonDialog { get; set; }
+        private static Dialog FullDialog { get; set; }
+        private static RectTransform PlaceForDialogues { get; set; }
+        private static string DefaultKey { get; set; }
+        private static string DefaultPath { get; set; }
+        private static float MinHeight { get; set; }
+        private static float MaxHeight { get; set; }
+        private static float AdditionalHeight { get; set; }
+        
+        #endregion
     }
 }

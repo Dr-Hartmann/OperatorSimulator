@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e91b5af85fc8d4fa11e7fd8eb25fbe, type: 3}
   m_Name: SimulationSettings 1
   m_EditorClassIdentifier: 
+  _prefabSimulationSystem: {fileID: 8733254232041377474, guid: 5ae28abcbae5252439856738df560f3f, type: 3}
   _state: 0
   _maxSpeed: 8
   _minSpeed: -4

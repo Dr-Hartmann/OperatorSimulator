@@ -16,7 +16,7 @@ public class LocalizedText : MonoBehaviour
     public void UpdateText()
     {
         if (IsNull()) return;
-        string newText = UISystem.GetUIText(_key);
+        string newText = UISystem.GetText(_key);
         _text.SetText(newText);
 
         if (_parent)

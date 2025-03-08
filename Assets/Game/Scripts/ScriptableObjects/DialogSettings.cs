@@ -8,6 +8,11 @@ public class DialogSettings : ScriptableObject
     [SerializeField] private string _defaultPath;
     [SerializeField] private string _defaultKey;
 
+    //[SerializeField] private float _maxWidth = 1700f;
+    [SerializeField] private float _minHeight = 200f;
+    [SerializeField] private float _maxHeight = 500f;
+    [SerializeField] private float _additionalHeight = 100f;
+
     public Dialog PrefabDialogFull
     {
         get => _dialogFull;
@@ -21,33 +26,16 @@ public class DialogSettings : ScriptableObject
     {
         get => _defaultKey;
     }
-}
-
-[CreateAssetMenu(fileName = "TriggerDialog", menuName = "Dialogues/new TriggerDialog")]
-public class TriggerDialog : DialogSettings
-{
-    [SerializeField] private string _dialogPathEnter;
-    [SerializeField] private string _dialogKeyEnter;
-
-    [SerializeField] private string _dialogPathExit;
-    [SerializeField] private string _dialogKeyExit;
-
-    public string DialogPathEnter
+    public float MinHeight
     {
-        get => _dialogPathEnter;
-
+        get => _minHeight;
     }
-    public string DialogKeyEnter
+    public float MaxHeight
     {
-        get => _dialogKeyEnter;
+        get => _maxHeight;
     }
-    public string DialogPathExit
+    public float AdditionalHeight
     {
-        get => _dialogPathExit;
-
-    }
-    public string DialogKeyExit
-    {
-        get => _dialogKeyExit;
+        get => _additionalHeight;
     }
 }

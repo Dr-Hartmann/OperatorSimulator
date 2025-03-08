@@ -1,5 +1,6 @@
 public enum LocalizationModes
 {
     SWITCH_NEXT,
-    SET
+    SET,
+    SET_DEFAULT
 }
