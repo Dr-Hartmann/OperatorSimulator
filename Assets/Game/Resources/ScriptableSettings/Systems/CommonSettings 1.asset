@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1b0710bf07947a40924f2f8c2b41bc4, type: 3}
-  m_Name: PlayerSettings
+  m_Script: {fileID: 11500000, guid: 93f93450317f3044e9e5322c55648f96, type: 3}
+  m_Name: CommonSettings 1
   m_EditorClassIdentifier: 
-  _playerPrefab: {fileID: 7105176664543209327, guid: f7d707139b0c1284dad5f3adc178aec5, type: 3}
-  _baseSpeed: 250
+  _targetFrameRate: 30
+  _vSyncCount: 0

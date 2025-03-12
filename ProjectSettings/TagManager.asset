@@ -4,10 +4,9 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Dialog
-  - DialogField1
-  - Canvas
-  - Content
+  - ValvesCenter
+  - UICanvas
+  - TipsPlace
   layers:
   - Default
   - TransparentFX

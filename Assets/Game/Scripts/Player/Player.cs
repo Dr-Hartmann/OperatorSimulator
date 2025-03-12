@@ -6,18 +6,26 @@ using PlayerBehaviors;
 
 namespace PlayerSpace
 {
-    [RequireComponent(typeof(Rigidbody2D))]
+    //[RequireComponent(typeof(Rigidbody2D))]
     public class Player : MonoBehaviour
     {
-        /*[SerializeField] */private SpriteRenderer _spriteRenderer;
-        /*[SerializeField] */private Animator _animator;
-        [SerializeField] private Rigidbody2D _rigidbody;
-
         private const string IS_IDLE = "IsIdle";
         private const string IS_MOVE = "IsMove";
         private const string IS_ATTACK = "IsAttack";
 
+        #region ANIMATOR
+        public void SetCanCancel()
+        {
+            _canCancel = true;
+        }
+        public void SetCannotCancel()
+        {
+            _canCancel = false;
+        }
+        #endregion
+
         #region PUBLIC
+        public Vector2 MoveVector { get; set; }
         public void SetBehaviorIdle()
         {
             SetBehavior(GetBehavior<PlayerBehaviorIdle>());
@@ -34,31 +42,27 @@ namespace PlayerSpace
         {
             SetBehaviorIdle();
         }
-        public void UpdateAnimatorSpeed(float multiplier = 1)
-        {
-            float newSpeed = SimulationSystem.CurrentSpeed * (SimulationSystem.IsPlayed ? 1f : 0f) * multiplier;
-            _animator.speed = Mathf.Abs(newSpeed);
-        }
-        public bool IsIdle()
-        {
-            return _animator.GetBool(_isIdle);
-        }
-        public bool IsMoving()
-        {
-            return _animator.GetBool(_isMove);
-        }
-        public bool IsAttacking()
-        {
-            return _animator.GetBool(_isAttack);
-        }
+        //public bool IsIdle()
+        //{
+        //    return _animator.GetBool(_isIdle);
+        //}
+        //public bool IsMoving()
+        //{
+        //    return _animator.GetBool(_isMove);
+        //}
+        //public bool IsAttacking()
+        //{
+        //    return _animator.GetBool(_isAttack);
+        //}
         #endregion
 
         #region CORE
         public void Init(float baseSpeed)
         {
-            Speed = baseSpeed;
+            _baseSpeed = baseSpeed;
             _spriteRenderer = GetComponent<SpriteRenderer>();
             _animator = GetComponent<Animator>();
+            _rigidbody = GetComponent<Rigidbody2D>();
 
             _behaviorMap = new();
             _behaviorMap[typeof(PlayerBehaviorIdle)] = new PlayerBehaviorIdle(EnterIdle, ExitIdle, UpdateIdle);
@@ -66,72 +70,90 @@ namespace PlayerSpace
             _behaviorMap[typeof(PlayerBehaviorAttacking)] = new PlayerBehaviorAttacking(EnterAttacking, ExitAttacking, UpdateAttacking);
             SetBehaviorByDefault();
 
-            UpdateAnimatorSpeed();
+            SimulationSystem.SpeedChanged += UpdateAnimatorSpeed;
+            SimulationSystem.TickPassed += BehaviorAction;
+            SimulationSystem.Played += StopMoving;
         }
-        private void FixedUpdate()
+        private void BehaviorAction(float tick)
         {
-            if (_behaviorCurrent != null && SimulationSystem.IsPlayed)
+            if (_behaviorCurrent != null)
             {
-                _behaviorCurrent.Update();
+                _behaviorCurrent.Update(tick);
             }
+        }
+        private void OnDestroy()
+        {
+            SimulationSystem.SpeedChanged -= UpdateAnimatorSpeed;
+            SimulationSystem.TickPassed -= BehaviorAction;
+            SimulationSystem.Played -= StopMoving;
         }
         #endregion
 
         #region IDLE
-        public void EnterIdle()
+        private void EnterIdle()
         {
             _animator.SetBool(_isIdle, true);
         }
-        public void UpdateIdle()
+        private void UpdateIdle(float speedMultiplier)
         {
 
         }
-        public void ExitIdle()
+        private void ExitIdle()
         {
             _animator.SetBool(_isIdle, false);
         }
         #endregion
 
         #region ATTACK
-        public void EnterAttacking()
+        private void EnterAttacking()
         {
             _animator.SetBool(_isAttack, true);
         }
-        public void UpdateAttacking()
+        private void UpdateAttacking(float speedMultiplier)
         {
 
         }
-        public void ExitAttacking()
+        private void ExitAttacking()
         {
             _animator.SetBool(_isAttack, false);
         }
         #endregion
 
         #region MOVE
-        public void EnterMoving()
+        private void EnterMoving()
         {
             _animator.SetBool(_isMove, true);
         }
-        public void UpdateMoving()
+        private void UpdateMoving(float tick)
         {
-            _rigidbody.linearVelocity = MoveVector * Speed * SimulationSystem.CurrentSpeed;
+            _rigidbody.linearVelocity = MoveVector * _baseSpeed * tick;
             if (_rigidbody.linearVelocity.x > 0) _spriteRenderer.flipX = false;
             else _spriteRenderer.flipX = true;
         }
-        public void ExitMoving()
+        private void ExitMoving()
         {
             _rigidbody.linearVelocity = new Vector2(0, 0);
             _animator.SetBool(_isMove, false);
         }
+        private void StopMoving(bool isPlayed)
+        {
+            if (!isPlayed) _rigidbody.linearVelocity = MoveVector * 0f;
+        }
         #endregion
 
-        #region BEHAVIOR
-        private void SetBehavior(PlayerBehavior newBehavior)
+        #region handlers
+        private /*IEnumerator*/ void SetBehavior(PlayerBehavior newBehavior)
         {
             if (_behaviorCurrent != null)
             {
                 _behaviorCurrent.Exit();
             }
+
+            //while (!_canCancel)
+            //{
+            //    yield return null;
+            //}
+
             _behaviorCurrent = newBehavior;
             _behaviorCurrent.Enter();
         }
@@ -139,14 +161,21 @@ namespace PlayerSpace
         {
             return _behaviorMap[typeof(T)];
         }
+        private void UpdateAnimatorSpeed(float speedMultiplier, bool isPlayed)
+        {
+            _animator.speed = Mathf.Abs(speedMultiplier * (isPlayed ? 1f : 0f));
+        }
         #endregion
 
         #region variables
+        private SpriteRenderer _spriteRenderer;
+        private Animator _animator;
+        private Rigidbody2D _rigidbody;
         private PlayerBehavior _behaviorCurrent;
         private Dictionary<Type, PlayerBehavior> _behaviorMap;
-        public Vector2 MoveVector { get; set; }
-        private float Speed { get; set; }
 
+        private float _baseSpeed;
+        private bool _canCancel = true;
         private int _isIdle = Animator.StringToHash(IS_IDLE);
         private int _isMove = Animator.StringToHash(IS_MOVE);
         private int _isAttack = Animator.StringToHash(IS_ATTACK);

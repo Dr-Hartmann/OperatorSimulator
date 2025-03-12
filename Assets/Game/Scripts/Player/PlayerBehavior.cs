@@ -6,9 +6,9 @@ namespace PlayerBehaviors
     {
         private Action _enter;
         private Action _exit;
-        private Action _update;
+        private Action<float> _update;
 
-        public PlayerBehavior(Action enter, Action exit, Action update)
+        public PlayerBehavior(Action enter, Action exit, Action<float> update)
         {
             _enter = enter;
             _exit = exit;
@@ -22,9 +22,9 @@ namespace PlayerBehaviors
         {
             _exit();
         }
-        public virtual void Update()
+        public virtual void Update(float tick)
         {
-            _update();
+            _update(tick);
         }
     }
 }

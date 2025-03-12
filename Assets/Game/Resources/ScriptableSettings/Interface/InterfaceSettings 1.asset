@@ -9,8 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1b0710bf07947a40924f2f8c2b41bc4, type: 3}
-  m_Name: PlayerSettings
+  m_Script: {fileID: 11500000, guid: ccb713bc95bc1dd459848f2d3fc7dea6, type: 3}
+  m_Name: InterfaceSettings 1
   m_EditorClassIdentifier: 
-  _playerPrefab: {fileID: 7105176664543209327, guid: f7d707139b0c1284dad5f3adc178aec5, type: 3}
-  _baseSpeed: 250
+  _interfacePrefab: {fileID: 8422468298354343721, guid: 55f9128578cc95e43844246838ed8659, type: 3}

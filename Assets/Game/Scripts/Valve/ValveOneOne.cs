@@ -10,24 +10,12 @@ using Simulation;
 [RequireComponent(typeof(Button))]
 public sealed class ValveOneOne : MonoBehaviour, IValve
 {
-    [SerializeField] private ValveOneOneSettings _valveSettings;
-
     [Header("Valve sensor")]
     [Range(MIN_VALUE_OPENNES, MAX_VALUE_OPENNES)]
     [SerializeField] private float _openingPercentage = MIN_VALUE_OPENNES;
     [SerializeField] private TextMeshProUGUI _openingSensorText;
 
-    private Image _thisImage;
-    private Button _thisButton;
-
-    private ValveStates _currentValveState;
-    private float _openingSpeed, _closingSpeed, _multiplierSoonToEndState;
-    private Sprite _spriteNeutral;
-    private Sprite _spriteClose;
-    private Sprite _spriteAverage;
-    private Sprite _spriteOpen;
-
-
+    #region PUBLIC
     public float OpenPercent
     {
         get => _openingPercentage;
@@ -49,34 +37,28 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     {
         get => _currentValveState == ValveStates.Closing;
     }
+    #endregion
 
-
-    private void OnClick()
+    #region CORE
+    public void Init(ValveStates startValveState, float openingSpeed, float closingSpeed, float multiplierSoonToEndState,
+        Sprite spriteNeutral, Sprite spriteClose, Sprite spriteAverage, Sprite spriteOpen)
     {
-        if (IsOpen || IsOpening) ChangeStateAndSprite(ValveStates.Closing, _spriteAverage);
-        else if (IsClose || IsClosing) ChangeStateAndSprite(ValveStates.Opening, _spriteAverage);
-        else
-        {
-            GameUtilities.Debug.GameUtilities.DisplayWarning($"Valve is in an unknown state");
-            return;
-        }
+        _currentValveState = startValveState;
+        _openingSpeed = openingSpeed;
+        _closingSpeed = closingSpeed;
+        _multiplierSoonToEndState = multiplierSoonToEndState;
+        _spriteNeutral = spriteNeutral;
+        _spriteClose = spriteClose;
+        _spriteAverage = spriteAverage;
+        _spriteOpen = spriteOpen;
+
+        if (IsClose) Close();
+        else if (IsOpen) Open();
     }
     private void Awake()
     {
         _thisButton = GetComponent<Button>();
         _thisImage = GetComponent<Image>();
-
-        _currentValveState = _valveSettings.StartValveState;
-        _openingSpeed = _valveSettings.OpeningSpeed;
-        _closingSpeed = _valveSettings.ClosingSpeed;
-        _multiplierSoonToEndState = _valveSettings.MultiplierSoonToEndState;
-        _spriteNeutral = _valveSettings.SpriteNeutral;
-        _spriteClose = _valveSettings.SpriteClose;
-        _spriteAverage = _valveSettings.SpriteAverage;
-        _spriteOpen = _valveSettings.SpriteOpen;
-
-        if (IsClose) Close();
-        else if (IsOpen) Open();
     }
     private void OnEnable()
     {
@@ -90,6 +72,9 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
     {
         OnDisable();
     }
+    #endregion
+
+    #region handlers
     private void UpdateValve(float tick)
     {
         _openingSensorText.text = ((int)OpenPercent).ToString();
@@ -136,21 +121,46 @@ public sealed class ValveOneOne : MonoBehaviour, IValve
         _currentValveState = state;
         _thisImage.sprite = sprite;
     }
+    #endregion
+
+    #region ON_CLICK
     private void SubscribeAll()
     {
         UnsubscribeAll();
-        SimulationSystem.SubEventTickPassed(UpdateValve);
+        SimulationSystem.TickPassed += UpdateValve;
         _thisButton.onClick.AddListener(OnClick);
     }
     private void UnsubscribeAll()
     {
-        SimulationSystem.UnsubEventTickPassed(UpdateValve);
-        _thisButton.onClick.RemoveAllListeners();
+        SimulationSystem.TickPassed -= UpdateValve;
+        _thisButton.onClick.RemoveListener(OnClick);
     }
+    private void OnClick()
+    {
+        if (IsOpen || IsOpening) ChangeStateAndSprite(ValveStates.Closing, _spriteAverage);
+        else if (IsClose || IsClosing) ChangeStateAndSprite(ValveStates.Opening, _spriteAverage);
+        else
+        {
+            Common.Utilities.Utilities.DisplayWarning($"Valve is in an unknown state");
+            return;
+        }
+    }
+    #endregion
 
-
+    #region variables
     private const float MAX_VALUE_OPENNES = 100f;
     private const float NEAR_OPEN = 95f;
     private const float MIN_VALUE_OPENNES = 0f;
     private const float NEAR_CLOSE = 5f;
+
+    private Image _thisImage;
+    private Button _thisButton;
+
+    private ValveStates _currentValveState;
+    private float _openingSpeed, _closingSpeed, _multiplierSoonToEndState;
+    private Sprite _spriteNeutral;
+    private Sprite _spriteClose;
+    private Sprite _spriteAverage;
+    private Sprite _spriteOpen;
+    #endregion
 }
